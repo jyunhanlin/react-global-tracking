@@ -35,6 +35,10 @@
   "simple-git-hooks": {
     "pre-push": "pnpm check"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jyunhanlin/react-auto-tracking.git"
+  },
   "license": "MIT",
   "engines": {
     "node": ">=20"
