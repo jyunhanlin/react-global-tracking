@@ -23,7 +23,7 @@ export interface TrackEvent {
   readonly eventType: string
   readonly timestamp: number
   readonly targetElement: Element
-  readonly target: ElementInfo
+  readonly elementInfo: ElementInfo
   readonly fiber: FiberInfo | null
   readonly nativeEvent: Event
   readonly rawFiber: object | null

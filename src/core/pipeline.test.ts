@@ -47,7 +47,7 @@ describe('createPipeline', () => {
     expect(callback).toHaveBeenCalledOnce()
     const trackEvent = callback.mock.calls[0][0]
     expect(trackEvent.eventType).toBe('click')
-    expect(trackEvent.target.tagName).toBe('BUTTON')
+    expect(trackEvent.elementInfo.tagName).toBe('BUTTON')
     expect(trackEvent.fiber?.componentName).toBe('SubmitButton')
     expect(trackEvent.fiber?.eventHandlers).toContain('onClick')
 

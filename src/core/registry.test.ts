@@ -8,7 +8,7 @@ function fakeEvent(eventType: string = 'click', targetElement?: Element): TrackE
     eventType,
     timestamp: Date.now(),
     targetElement: el,
-    target: {
+    elementInfo: {
       tagName: 'BUTTON',
       id: '',
       className: '',
@@ -132,7 +132,6 @@ describe('createRegistry', () => {
     nav.appendChild(navLink)
     document.body.appendChild(nav)
 
-    // targetElement is the resolved trackable element, not nativeEvent.target
     registry.invoke(fakeEvent('click', navLink))
     expect(cb).toHaveBeenCalledOnce()
 

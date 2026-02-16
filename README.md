@@ -26,7 +26,7 @@ const tracker = init()
 
 // Track all clicks on interactive elements
 const unsubscribe = tracker.on('click', (event) => {
-  console.log(event.target.tagName)           // 'BUTTON'
+  console.log(event.elementInfo.tagName)      // 'BUTTON'
   console.log(event.fiber?.componentName)    // 'SubmitButton'
   console.log(event.fiber?.eventHandlers)    // ['onClick']
 })
@@ -81,12 +81,12 @@ Each callback receives a `TrackEvent`:
 
 ```ts
 interface TrackEvent {
-  eventType: string        // 'click', 'input', 'scroll', etc.
+  eventType: string      // 'click', 'input', 'scroll', etc.
   timestamp: number
-  targetElement: Element   // resolved DOM element (may differ from event.target)
-  target: ElementInfo      // extracted metadata
+  targetElement: Element // resolved DOM element (may differ from nativeEvent.target)
+  elementInfo: ElementInfo
   fiber: FiberInfo | null
-  nativeEvent: Event       // original DOM event
+  nativeEvent: Event     // original DOM event
   rawFiber: object | null
 }
 

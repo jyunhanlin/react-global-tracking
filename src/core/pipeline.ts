@@ -41,7 +41,7 @@ export function createPipeline(config: ResolvedConfig): Pipeline {
         eventType: domEvent.type,
         timestamp: Date.now(),
         targetElement: trackableElement,
-        target: elementInfo,
+        elementInfo,
         fiber: fiberInfo,
         nativeEvent: domEvent,
         rawFiber,
