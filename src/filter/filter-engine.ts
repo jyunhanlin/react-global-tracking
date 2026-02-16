@@ -1,5 +1,6 @@
+import type { FiberInfo } from '../types'
 import { getEventCategory, getHandlersForEvent, EventCategory } from './event-categories'
-import { resolveFiber } from '../extract/fiber'
+import { resolveFiber, extractFiberInfo } from '../extract/fiber'
 import { safeMatches } from '../utils/safe-matches'
 
 const INTERACTIVE_TAGS = new Set([
@@ -40,7 +41,7 @@ const MAX_ANCESTOR_DEPTH = 10
 
 export interface FilterResult {
   readonly element: Element
-  readonly fiber: object | null
+  readonly fiber: FiberInfo | null
 }
 
 interface FindTrackableParams {
@@ -75,9 +76,9 @@ function findPointerTarget(
     if (isIgnored(current, ignoreSelectors)) return null
     if (isDisabled(current)) return null
 
-    const fiber = findInteractiveFiber(current, eventType)
-    if (fiber !== undefined) {
-      return { element: current, fiber }
+    const rawFiber = findInteractiveFiber(current, eventType)
+    if (rawFiber !== undefined) {
+      return { element: current, fiber: extractFiberInfo(rawFiber) }
     }
 
     current = current.parentElement
@@ -93,7 +94,7 @@ function findFormTarget(
 ): FilterResult | null {
   if (isIgnored(target, ignoreSelectors)) return null
   if (isDisabled(target)) return null
-  return { element: target, fiber: resolveFiber(target) }
+  return { element: target, fiber: extractFiberInfo(resolveFiber(target)) }
 }
 
 function findAmbientTarget(
@@ -101,7 +102,7 @@ function findAmbientTarget(
   ignoreSelectors: readonly string[],
 ): FilterResult | null {
   if (isIgnored(target, ignoreSelectors)) return null
-  return { element: target, fiber: resolveFiber(target) }
+  return { element: target, fiber: extractFiberInfo(resolveFiber(target)) }
 }
 
 /**

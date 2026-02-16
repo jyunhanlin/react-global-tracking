@@ -1,5 +1,4 @@
 import type { TrackEvent, TrackCallback, ListenerOptions } from '../types'
-import { extractFiberInfo } from '../extract/fiber'
 import { findTrackableElement } from '../filter/filter-engine'
 import { createRegistry } from './registry'
 
@@ -24,7 +23,6 @@ export function createPipeline(config: PipelineConfig): Pipeline {
       const target = domEvent.target
       if (!(target instanceof Element)) return
 
-      // Filter: find trackable element based on event category
       const result = findTrackableElement({
         target,
         ignoreSelectors: config.ignoreSelectors,
@@ -32,16 +30,12 @@ export function createPipeline(config: PipelineConfig): Pipeline {
       })
       if (result === null) return
 
-      // Extract fiber info from already-resolved fiber (no double resolution)
-      const fiberInfo = extractFiberInfo(result.fiber)
-
       const trackEvent: TrackEvent = {
         nativeEvent: domEvent,
         targetElement: result.element,
-        fiber: fiberInfo,
+        fiber: result.fiber,
       }
 
-      // Invoke callbacks → update lastEvent
       registry.invoke(trackEvent)
       lastEvent = trackEvent
     },
