@@ -85,7 +85,7 @@ interface TrackEvent {
   timestamp: number
   element: ElementInfo
   fiber: FiberInfo | null
-  raw: Event             // original DOM event
+  nativeEvent: Event     // original DOM event
   rawFiberNode: object | null
 }
 

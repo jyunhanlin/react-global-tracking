@@ -17,7 +17,7 @@ function fakeEvent(type: string = 'click'): TrackEvent {
       dataset: {},
     },
     fiber: null,
-    raw: new Event(type),
+    nativeEvent: new Event(type),
     rawFiberNode: null,
   }
 }
@@ -131,7 +131,7 @@ describe('createRegistry', () => {
     document.body.appendChild(nav)
 
     const matchingEvent = fakeEvent('click')
-    Object.defineProperty(matchingEvent, 'raw', {
+    Object.defineProperty(matchingEvent, 'nativeEvent', {
       value: { target: navLink },
     })
     registry.invoke(matchingEvent)
@@ -140,7 +140,7 @@ describe('createRegistry', () => {
     const div = document.createElement('div')
     document.body.appendChild(div)
     const nonMatchingEvent = fakeEvent('click')
-    Object.defineProperty(nonMatchingEvent, 'raw', {
+    Object.defineProperty(nonMatchingEvent, 'nativeEvent', {
       value: { target: div },
     })
     registry.invoke(nonMatchingEvent)

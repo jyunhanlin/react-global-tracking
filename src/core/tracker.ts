@@ -21,7 +21,7 @@ export function createTracker(config?: TrackerConfig): Tracker {
 
       if (resolved.debug) {
         const lastEvent = pipeline.getLastEvent()
-        if (lastEvent?.raw === event) {
+        if (lastEvent?.nativeEvent === event) {
           console.debug('[react-auto-tracking]', lastEvent)
         }
       }

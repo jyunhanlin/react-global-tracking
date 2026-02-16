@@ -42,7 +42,7 @@ export function createPipeline(config: ResolvedConfig): Pipeline {
         timestamp: Date.now(),
         element: elementInfo,
         fiber: fiberInfo,
-        raw: domEvent,
+        nativeEvent: domEvent,
         rawFiberNode,
       }
 

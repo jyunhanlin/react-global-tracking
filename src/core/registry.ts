@@ -52,7 +52,7 @@ export function createRegistry(): Registry {
 
         // selector check
         if (entry.options.selector != null) {
-          const target = event.raw.target
+          const target = event.nativeEvent.target
           if (!(target instanceof Element) || !target.matches(entry.options.selector)) {
             continue
           }
