@@ -111,6 +111,80 @@ describe('createTracker', () => {
     button.remove()
   })
 
+  it('supports multiple listeners for same event type', () => {
+    const tracker = createTracker()
+    const cb1 = vi.fn()
+    const cb2 = vi.fn()
+    const cb3 = vi.fn()
+
+    tracker.on('click', cb1)
+    tracker.on('click', cb2)
+    tracker.on('click', cb3)
+
+    const button = document.createElement('button')
+    document.body.appendChild(button)
+
+    button.click()
+
+    expect(cb1).toHaveBeenCalledOnce()
+    expect(cb2).toHaveBeenCalledOnce()
+    expect(cb3).toHaveBeenCalledOnce()
+
+    button.remove()
+    tracker.destroy()
+  })
+
+  it('unsubscribing one listener does not affect others', () => {
+    const addSpy = vi.spyOn(document, 'addEventListener')
+    const removeSpy = vi.spyOn(document, 'removeEventListener')
+    const tracker = createTracker()
+    const cb1 = vi.fn()
+    const cb2 = vi.fn()
+
+    const unsub1 = tracker.on('click', cb1)
+    tracker.on('click', cb2)
+
+    // only one DOM listener should be added
+    const addCalls = addSpy.mock.calls.filter(([type]) => type === 'click')
+    expect(addCalls).toHaveLength(1)
+
+    // unsubscribe cb1, cb2 is still registered → DOM listener stays
+    unsub1()
+    const removeCalls = removeSpy.mock.calls.filter(([type]) => type === 'click')
+    expect(removeCalls).toHaveLength(0)
+
+    const button = document.createElement('button')
+    document.body.appendChild(button)
+    button.click()
+
+    expect(cb1).not.toHaveBeenCalled()
+    expect(cb2).toHaveBeenCalledOnce()
+
+    button.remove()
+    tracker.destroy()
+    addSpy.mockRestore()
+    removeSpy.mockRestore()
+  })
+
+  it('removes DOM listener only when last callback for that type unsubscribes', () => {
+    const removeSpy = vi.spyOn(document, 'removeEventListener')
+    const tracker = createTracker()
+
+    const unsub1 = tracker.on('click', vi.fn())
+    const unsub2 = tracker.on('click', vi.fn())
+
+    unsub1()
+    // still one click listener in registry → DOM listener stays
+    expect(removeSpy.mock.calls.filter(([type]) => type === 'click')).toHaveLength(0)
+
+    unsub2()
+    // no more click listeners → DOM listener removed
+    expect(removeSpy.mock.calls.filter(([type]) => type === 'click')).toHaveLength(1)
+
+    removeSpy.mockRestore()
+    tracker.destroy()
+  })
+
   it('logs events when debug is true', () => {
     const consoleSpy = vi.spyOn(console, 'debug').mockImplementation(() => {})
     const tracker = createTracker({ debug: true })
