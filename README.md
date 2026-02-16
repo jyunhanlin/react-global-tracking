@@ -1,4 +1,4 @@
-# react-auto-tracking
+# react-global-tracking
 
 Global user interaction tracking for React apps (16–19). Captures clicks, form events, and ambient events via DOM event delegation with automatic React fiber introspection.
 
@@ -14,13 +14,13 @@ Global user interaction tracking for React apps (16–19). Captures clicks, form
 ## Install
 
 ```bash
-npm install react-auto-tracking
+npm install react-global-tracking
 ```
 
 ## Quick Start
 
 ```ts
-import { init } from 'react-auto-tracking'
+import { init } from 'react-global-tracking'
 
 const tracker = init()
 

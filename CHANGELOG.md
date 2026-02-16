@@ -1,4 +1,4 @@
-# react-auto-tracking
+# react-global-tracking
 
 ## 0.1.0
 

@@ -30,7 +30,7 @@ export function createTracker(config?: TrackerConfig): Tracker {
       if (debug) {
         const lastEvent = pipeline.getLastEvent()
         if (lastEvent?.nativeEvent === event) {
-          console.debug('[react-auto-tracking]', lastEvent)
+          console.debug('[react-global-tracking]', lastEvent)
         }
       }
     }
