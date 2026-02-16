@@ -31,11 +31,3 @@ export interface FiberInfo {
 }
 
 export type TrackCallback = (event: TrackEvent) => void
-
-// === Internal Types ===
-
-export interface ResolvedConfig {
-  readonly enabled: boolean
-  readonly ignoreSelectors: readonly string[]
-  readonly debug: boolean
-}

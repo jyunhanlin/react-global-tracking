@@ -141,4 +141,14 @@ describe('createRegistry', () => {
 
     expect(cb).not.toHaveBeenCalled()
   })
+
+  it('does not throw on invalid CSS selector', () => {
+    const registry = createRegistry()
+    const cb = vi.fn()
+
+    registry.add('click', cb, { selector: '[invalid' })
+    registry.invoke(fakeEvent('click'))
+
+    expect(cb).not.toHaveBeenCalled()
+  })
 })

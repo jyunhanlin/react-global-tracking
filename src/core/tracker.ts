@@ -3,14 +3,15 @@ import type {
   TrackerConfig,
   TrackCallback,
   ListenerOptions,
-  ResolvedConfig,
 } from '../types'
 import { createPipeline } from './pipeline'
 
 export function createTracker(config?: TrackerConfig): Tracker {
-  const resolved = resolveConfig(config)
+  const enabled = config?.enabled ?? true
+  const ignoreSelectors = config?.ignoreSelectors ?? []
+  const debug = config?.debug ?? false
 
-  if (!resolved.enabled) {
+  if (!enabled) {
     return {
       on: () => () => {},
       getLastEvent: () => null,
@@ -18,7 +19,7 @@ export function createTracker(config?: TrackerConfig): Tracker {
     }
   }
 
-  const pipeline = createPipeline(resolved)
+  const pipeline = createPipeline({ ignoreSelectors })
   const domListeners = new Map<string, (event: Event) => void>()
   let destroyed = false
 
@@ -31,7 +32,7 @@ export function createTracker(config?: TrackerConfig): Tracker {
     const handler = (event: Event): void => {
       pipeline.handleEvent(event)
 
-      if (resolved.debug) {
+      if (debug) {
         const lastEvent = pipeline.getLastEvent()
         if (lastEvent?.nativeEvent === event) {
           console.debug('[react-auto-tracking]', lastEvent)
@@ -82,13 +83,5 @@ export function createTracker(config?: TrackerConfig): Tracker {
       }
       domListeners.clear()
     },
-  }
-}
-
-function resolveConfig(config?: TrackerConfig): ResolvedConfig {
-  return {
-    enabled: config?.enabled ?? true,
-    ignoreSelectors: config?.ignoreSelectors ?? [],
-    debug: config?.debug ?? false,
   }
 }

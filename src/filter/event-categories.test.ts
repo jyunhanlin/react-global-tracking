@@ -17,8 +17,8 @@ describe('getEventCategory', () => {
     }
   })
 
-  it('returns Ambient for scroll/keydown/keyup/copy/paste', () => {
-    for (const type of ['scroll', 'keydown', 'keyup', 'copy', 'paste']) {
+  it('returns Ambient for scroll/keydown/keyup/copy/paste/resize/popstate/hashchange', () => {
+    for (const type of ['scroll', 'keydown', 'keyup', 'copy', 'paste', 'resize', 'popstate', 'hashchange']) {
       expect(getEventCategory(type)).toBe(EventCategory.Ambient)
     }
   })

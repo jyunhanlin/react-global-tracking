@@ -1,10 +1,10 @@
 import type { TrackEvent, TrackCallback, ListenerOptions } from '../types'
 import { debounce } from '../utils/debounce'
 import { throttle } from '../utils/throttle'
+import { safeMatches } from '../utils/safe-matches'
 
 interface RegistryEntry {
   readonly eventType: string
-  readonly originalCallback: TrackCallback
   readonly wrappedCallback: TrackCallback & { cancel?: () => void }
   readonly options: ListenerOptions
   readonly unsubscribe: () => void
@@ -28,7 +28,6 @@ export function createRegistry(): Registry {
     const wrappedCallback = wrapCallback(callback, options)
     const entry: RegistryEntry = {
       eventType,
-      originalCallback: callback,
       wrappedCallback,
       options,
       unsubscribe: () => {
@@ -50,9 +49,8 @@ export function createRegistry(): Registry {
       for (const entry of entries) {
         if (entry.eventType !== event.nativeEvent.type) continue
 
-        // selector check — uses the resolved trackable element, not the raw event target
         if (entry.options.selector != null) {
-          if (!event.targetElement.matches(entry.options.selector)) {
+          if (!safeMatches(event.targetElement, entry.options.selector)) {
             continue
           }
         }

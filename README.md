@@ -112,9 +112,9 @@ The library intentionally keeps `TrackEvent` minimal — use `nativeEvent` and `
 
 | Category | Events | Behavior |
 |----------|--------|----------|
-| **Pointer** | `click` | Walks DOM ancestors to find interactive element (button, link, ARIA role, React handler) |
+| **Pointer** | `click`, `touchstart`, `touchend` | Walks DOM ancestors to find interactive element (button, link, ARIA role, React handler) |
 | **Form** | `input`, `change`, `focus`, `blur`, `submit` | Tracks target directly, skips disabled elements |
-| **Ambient** | `scroll`, `keydown`, `keyup`, `resize`, `popstate`, `hashchange` | Tracks target directly, does not skip disabled |
+| **Ambient** | `scroll`, `keydown`, `keyup`, `copy`, `paste`, `resize`, `popstate`, `hashchange` | Tracks target directly, does not skip disabled |
 
 ## How It Works
 

@@ -46,6 +46,9 @@ const CATEGORY_MAP: Readonly<Record<string, EventCategory>> = {
   keyup: EventCategory.Ambient,
   copy: EventCategory.Ambient,
   paste: EventCategory.Ambient,
+  resize: EventCategory.Ambient,
+  popstate: EventCategory.Ambient,
+  hashchange: EventCategory.Ambient,
 }
 
 export function getEventCategory(eventType: string): EventCategory {

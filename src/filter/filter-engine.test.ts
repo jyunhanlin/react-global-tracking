@@ -8,7 +8,7 @@ describe('isIgnored', () => {
     el.className = 'no-track'
     document.body.appendChild(el)
 
-    expect(isIgnored({ element: el, ignoreSelectors: ['.no-track'] })).toBe(true)
+    expect(isIgnored(el, ['.no-track'])).toBe(true)
     el.remove()
   })
 
@@ -16,7 +16,15 @@ describe('isIgnored', () => {
     const el = document.createElement('button')
     document.body.appendChild(el)
 
-    expect(isIgnored({ element: el, ignoreSelectors: ['.no-track'] })).toBe(false)
+    expect(isIgnored(el, ['.no-track'])).toBe(false)
+    el.remove()
+  })
+
+  it('returns false for invalid CSS selector', () => {
+    const el = document.createElement('button')
+    document.body.appendChild(el)
+
+    expect(isIgnored(el, ['[invalid'])).toBe(false)
     el.remove()
   })
 })
@@ -51,7 +59,7 @@ describe('findTrackableElement', () => {
       document.body.appendChild(el)
 
       const result = findTrackableElement({ target: el, ignoreSelectors: [], eventType: 'click' })
-      expect(result).toBe(el)
+      expect(result?.element).toBe(el)
       el.remove()
     })
 
@@ -61,7 +69,7 @@ describe('findTrackableElement', () => {
       document.body.appendChild(el)
 
       const result = findTrackableElement({ target: el, ignoreSelectors: [], eventType: 'click' })
-      expect(result).toBe(el)
+      expect(result?.element).toBe(el)
       el.remove()
     })
 
@@ -70,7 +78,7 @@ describe('findTrackableElement', () => {
       document.body.appendChild(el)
 
       const result = findTrackableElement({ target: el, ignoreSelectors: [], eventType: 'click' })
-      expect(result).toBe(el)
+      expect(result?.element).toBe(el)
       el.remove()
     })
 
@@ -79,7 +87,7 @@ describe('findTrackableElement', () => {
       document.body.appendChild(el)
 
       const result = findTrackableElement({ target: el, ignoreSelectors: [], eventType: 'click' })
-      expect(result).toBe(el)
+      expect(result?.element).toBe(el)
       el.remove()
     })
 
@@ -91,7 +99,7 @@ describe('findTrackableElement', () => {
         document.body.appendChild(el)
 
         const result = findTrackableElement({ target: el, ignoreSelectors: [], eventType: 'click' })
-        expect(result).toBe(el)
+        expect(result?.element).toBe(el)
         el.remove()
       },
     )
@@ -106,7 +114,8 @@ describe('findTrackableElement', () => {
       }
 
       const result = findTrackableElement({ target: el, ignoreSelectors: [], eventType: 'click' })
-      expect(result).toBe(el)
+      expect(result?.element).toBe(el)
+      expect(result?.fiber).not.toBeNull()
       el.remove()
     })
 
@@ -117,7 +126,7 @@ describe('findTrackableElement', () => {
       document.body.appendChild(button)
 
       const result = findTrackableElement({ target: span, ignoreSelectors: [], eventType: 'click' })
-      expect(result).toBe(button)
+      expect(result?.element).toBe(button)
       button.remove()
     })
 
@@ -130,7 +139,7 @@ describe('findTrackableElement', () => {
       document.body.appendChild(button)
 
       const result = findTrackableElement({ target: path, ignoreSelectors: [], eventType: 'click' })
-      expect(result).toBe(button)
+      expect(result?.element).toBe(button)
       button.remove()
     })
 
@@ -193,7 +202,7 @@ describe('findTrackableElement', () => {
       document.body.appendChild(el)
 
       const result = findTrackableElement({ target: el, ignoreSelectors: [], eventType: 'input' })
-      expect(result).toBe(el)
+      expect(result?.element).toBe(el)
       el.remove()
     })
 
@@ -228,7 +237,7 @@ describe('findTrackableElement', () => {
       document.body.appendChild(el)
 
       const result = findTrackableElement({ target: el, ignoreSelectors: [], eventType: 'scroll' })
-      expect(result).toBe(el)
+      expect(result?.element).toBe(el)
       el.remove()
     })
 
@@ -252,7 +261,7 @@ describe('findTrackableElement', () => {
       document.body.appendChild(el)
 
       const result = findTrackableElement({ target: el, ignoreSelectors: [], eventType: 'scroll' })
-      expect(result).toBe(el)
+      expect(result?.element).toBe(el)
       el.remove()
     })
   })

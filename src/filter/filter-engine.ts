@@ -1,5 +1,6 @@
 import { getEventCategory, getHandlersForEvent, EventCategory } from './event-categories'
 import { resolveFiber } from '../extract/fiber'
+import { safeMatches } from '../utils/safe-matches'
 
 const INTERACTIVE_TAGS = new Set([
   'BUTTON',
@@ -37,13 +38,18 @@ const INTERACTIVE_ROLES = new Set([
 
 const MAX_ANCESTOR_DEPTH = 10
 
-interface GetTrackableElementParams {
+export interface FilterResult {
+  readonly element: Element
+  readonly fiber: object | null
+}
+
+interface FindTrackableParams {
   readonly target: Element
   readonly ignoreSelectors: readonly string[]
   readonly eventType: string
 }
 
-export function findTrackableElement(params: GetTrackableElementParams): Element | null {
+export function findTrackableElement(params: FindTrackableParams): FilterResult | null {
   const { target, ignoreSelectors, eventType } = params
   const category = getEventCategory(eventType)
 
@@ -61,14 +67,19 @@ function findPointerTarget(
   target: Element,
   ignoreSelectors: readonly string[],
   eventType: string,
-): Element | null {
+): FilterResult | null {
   let current: Element | null = target
   let depth = 0
 
   while (current !== null && depth <= MAX_ANCESTOR_DEPTH) {
-    if (isIgnored({ element: current, ignoreSelectors })) return null
+    if (isIgnored(current, ignoreSelectors)) return null
     if (isDisabled(current)) return null
-    if (isInteractiveElement(current, eventType)) return current
+
+    const fiber = findInteractiveFiber(current, eventType)
+    if (fiber !== undefined) {
+      return { element: current, fiber }
+    }
+
     current = current.parentElement
     depth++
   }
@@ -76,24 +87,34 @@ function findPointerTarget(
   return null
 }
 
-function findFormTarget(target: Element, ignoreSelectors: readonly string[]): Element | null {
-  if (isIgnored({ element: target, ignoreSelectors })) return null
+function findFormTarget(
+  target: Element,
+  ignoreSelectors: readonly string[],
+): FilterResult | null {
+  if (isIgnored(target, ignoreSelectors)) return null
   if (isDisabled(target)) return null
-  return target
+  return { element: target, fiber: resolveFiber(target) }
 }
 
-function findAmbientTarget(target: Element, ignoreSelectors: readonly string[]): Element | null {
-  if (isIgnored({ element: target, ignoreSelectors })) return null
-  return target
+function findAmbientTarget(
+  target: Element,
+  ignoreSelectors: readonly string[],
+): FilterResult | null {
+  if (isIgnored(target, ignoreSelectors)) return null
+  return { element: target, fiber: resolveFiber(target) }
 }
 
-function isInteractiveElement(el: Element, eventType: string): boolean {
+/**
+ * Returns the raw fiber if the element is interactive, or undefined if not.
+ * null means "interactive but no fiber found" (semantic tag / ARIA role).
+ */
+function findInteractiveFiber(el: Element, eventType: string): object | null | undefined {
   // 1. Semantic tag
-  if (INTERACTIVE_TAGS.has(el.tagName)) return true
+  if (INTERACTIVE_TAGS.has(el.tagName)) return resolveFiber(el)
 
   // 2. ARIA role
   const role = el.getAttribute('role')
-  if (role !== null && INTERACTIVE_ROLES.has(role)) return true
+  if (role !== null && INTERACTIVE_ROLES.has(role)) return resolveFiber(el)
 
   // 3. React event handler via fiber
   const handlers = getHandlersForEvent(eventType)
@@ -103,20 +124,17 @@ function isInteractiveElement(el: Element, eventType: string): boolean {
       const props = (fiber as any).memoizedProps
       if (props !== null && props !== undefined) {
         for (const handler of handlers) {
-          if (typeof props[handler] === 'function') return true
+          if (typeof props[handler] === 'function') return fiber
         }
       }
     }
   }
 
-  return false
+  return undefined
 }
 
-export function isIgnored(params: {
-  readonly element: Element
-  readonly ignoreSelectors: readonly string[]
-}): boolean {
-  return params.ignoreSelectors.some((selector) => params.element.matches(selector))
+export function isIgnored(element: Element, ignoreSelectors: readonly string[]): boolean {
+  return ignoreSelectors.some((selector) => safeMatches(element, selector))
 }
 
 export function isDisabled(el: Element): boolean {
