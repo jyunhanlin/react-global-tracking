@@ -33,17 +33,17 @@ export function createPipeline(config: ResolvedConfig): Pipeline {
 
       // Extract info
       const elementInfo = extractElementInfo(trackableElement)
-      const rawFiberNode = resolveFiber(trackableElement)
-      const fiberInfo = extractFiberInfo(rawFiberNode)
+      const rawFiber = resolveFiber(trackableElement)
+      const fiberInfo = extractFiberInfo(rawFiber)
 
       // Build payload
       const trackEvent: TrackEvent = {
-        type: domEvent.type,
+        eventType: domEvent.type,
         timestamp: Date.now(),
-        element: elementInfo,
+        target: elementInfo,
         fiber: fiberInfo,
         nativeEvent: domEvent,
-        rawFiberNode,
+        rawFiber,
       }
 
       // Invoke callbacks → update lastEvent

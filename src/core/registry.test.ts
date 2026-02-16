@@ -2,23 +2,23 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { createRegistry } from './registry'
 import type { TrackEvent } from '../types'
 
-function fakeEvent(type: string = 'click'): TrackEvent {
+function fakeEvent(eventType: string = 'click'): TrackEvent {
   return {
-    type,
+    eventType,
     timestamp: Date.now(),
-    element: {
+    target: {
       tagName: 'BUTTON',
       id: '',
       className: '',
-      text: '',
+      textContent: '',
       href: null,
       role: null,
-      type: null,
+      inputType: null,
       dataset: {},
     },
     fiber: null,
-    nativeEvent: new Event(type),
-    rawFiberNode: null,
+    nativeEvent: new Event(eventType),
+    rawFiber: null,
   }
 }
 

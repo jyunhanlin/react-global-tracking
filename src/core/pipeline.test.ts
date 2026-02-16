@@ -47,10 +47,10 @@ describe('createPipeline', () => {
 
     expect(callback).toHaveBeenCalledOnce()
     const trackEvent = callback.mock.calls[0][0]
-    expect(trackEvent.type).toBe('click')
-    expect(trackEvent.element.tagName).toBe('BUTTON')
+    expect(trackEvent.eventType).toBe('click')
+    expect(trackEvent.target.tagName).toBe('BUTTON')
     expect(trackEvent.fiber?.componentName).toBe('SubmitButton')
-    expect(trackEvent.fiber?.handlers).toContain('onClick')
+    expect(trackEvent.fiber?.eventHandlers).toContain('onClick')
 
     button.remove()
   })
@@ -142,7 +142,7 @@ describe('createPipeline', () => {
     pipeline.handleEvent(event)
 
     expect(pipeline.getLastEvent()).not.toBeNull()
-    expect(pipeline.getLastEvent()?.type).toBe('click')
+    expect(pipeline.getLastEvent()?.eventType).toBe('click')
 
     button.remove()
   })

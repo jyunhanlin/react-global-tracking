@@ -133,7 +133,7 @@ describe('extractFiberInfo', () => {
     })
 
     const info = extractFiberInfo(fiber)
-    expect(info?.handlers).toEqual(['onClick', 'onMouseDown'])
+    expect(info?.eventHandlers).toEqual(['onClick', 'onMouseDown'])
   })
 
   it('builds component stack from fiber tree', () => {
@@ -155,7 +155,7 @@ describe('extractFiberInfo', () => {
     })
 
     const info = extractFiberInfo(hostFiber)
-    expect(info?.componentStack).toEqual(['SubmitButton', 'Form', 'App'])
+    expect(info?.ancestorComponents).toEqual(['SubmitButton', 'Form', 'App'])
   })
 
   it('skips non-component fiber nodes in stack', () => {
@@ -174,6 +174,6 @@ describe('extractFiberInfo', () => {
     })
 
     const info = extractFiberInfo(btnFiber)
-    expect(info?.componentStack).toEqual(['App'])
+    expect(info?.ancestorComponents).toEqual(['App'])
   })
 })

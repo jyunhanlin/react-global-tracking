@@ -74,7 +74,7 @@ describe('createTracker', () => {
     button.click()
 
     expect(cb).toHaveBeenCalledOnce()
-    expect(tracker.getLastEvent()?.type).toBe('click')
+    expect(tracker.getLastEvent()?.eventType).toBe('click')
 
     button.remove()
     tracker.destroy()

@@ -61,13 +61,13 @@ export function extractFiberInfo(rawFiber: object | null): FiberInfo | null {
   if (rawFiber === null) return null
 
   const fiber = rawFiber as FiberNode
-  const handlers = extractHandlers(fiber)
-  const { componentName, componentStack } = extractComponentInfo(fiber)
+  const eventHandlers = extractHandlers(fiber)
+  const { componentName, ancestorComponents } = extractComponentInfo(fiber)
 
   return {
     componentName,
-    componentStack,
-    handlers,
+    ancestorComponents,
+    eventHandlers,
   }
 }
 
@@ -82,7 +82,7 @@ function extractHandlers(fiber: FiberNode): string[] {
 
 function extractComponentInfo(fiber: FiberNode): {
   componentName: string | null
-  componentStack: string[]
+  ancestorComponents: string[]
 } {
   const stack: string[] = []
   let componentName: string | null = null
@@ -101,7 +101,7 @@ function extractComponentInfo(fiber: FiberNode): {
     depth++
   }
 
-  return { componentName, componentStack: stack }
+  return { componentName, ancestorComponents: stack }
 }
 
 function getComponentName(fiber: FiberNode): string | null {

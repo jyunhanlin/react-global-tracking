@@ -48,7 +48,7 @@ export function createRegistry(): Registry {
 
     invoke(event: TrackEvent): void {
       for (const entry of entries) {
-        if (entry.eventType !== event.type) continue
+        if (entry.eventType !== event.eventType) continue
 
         // selector check
         if (entry.options.selector != null) {

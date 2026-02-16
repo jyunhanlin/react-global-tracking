@@ -21,29 +21,29 @@ export interface ListenerOptions {
 }
 
 export interface TrackEvent {
-  readonly type: string
+  readonly eventType: string
   readonly timestamp: number
-  readonly element: ElementInfo
+  readonly target: ElementInfo
   readonly fiber: FiberInfo | null
   readonly nativeEvent: Event
-  readonly rawFiberNode: object | null
+  readonly rawFiber: object | null
 }
 
 export interface ElementInfo {
   readonly tagName: string
   readonly id: string
   readonly className: string
-  readonly text: string
+  readonly textContent: string
   readonly href: string | null
   readonly role: string | null
-  readonly type: string | null
+  readonly inputType: string | null
   readonly dataset: Readonly<Record<string, string>>
 }
 
 export interface FiberInfo {
   readonly componentName: string | null
-  readonly componentStack: readonly string[]
-  readonly handlers: readonly string[]
+  readonly ancestorComponents: readonly string[]
+  readonly eventHandlers: readonly string[]
 }
 
 export type TrackCallback = (event: TrackEvent) => void

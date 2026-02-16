@@ -26,9 +26,9 @@ const tracker = init()
 
 // Track all clicks on interactive elements
 const unsubscribe = tracker.on('click', (event) => {
-  console.log(event.element.tagName)        // 'BUTTON'
+  console.log(event.target.tagName)           // 'BUTTON'
   console.log(event.fiber?.componentName)    // 'SubmitButton'
-  console.log(event.fiber?.handlers)         // ['onClick']
+  console.log(event.fiber?.eventHandlers)    // ['onClick']
 })
 
 // Clean up
@@ -81,29 +81,29 @@ Each callback receives a `TrackEvent`:
 
 ```ts
 interface TrackEvent {
-  type: string           // 'click', 'input', 'scroll', etc.
+  eventType: string      // 'click', 'input', 'scroll', etc.
   timestamp: number
-  element: ElementInfo
+  target: ElementInfo
   fiber: FiberInfo | null
   nativeEvent: Event     // original DOM event
-  rawFiberNode: object | null
+  rawFiber: object | null
 }
 
 interface ElementInfo {
   tagName: string
   id: string
   className: string
-  text: string           // trimmed textContent (max 200 chars)
+  textContent: string    // trimmed, max 100 chars
   href: string | null
   role: string | null
-  type: string | null    // input type attribute
+  inputType: string | null
   dataset: Record<string, string>
 }
 
 interface FiberInfo {
-  componentName: string | null    // nearest React component
-  componentStack: string[]        // ['App', 'Layout', 'SubmitButton']
-  handlers: string[]              // ['onClick', 'onMouseEnter']
+  componentName: string | null       // nearest React component
+  ancestorComponents: string[]       // ['SubmitButton', 'Form', 'App']
+  eventHandlers: string[]            // ['onClick', 'onMouseEnter']
 }
 ```
 

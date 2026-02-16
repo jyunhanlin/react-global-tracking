@@ -13,10 +13,10 @@ describe('extractElementInfo', () => {
     expect(info.tagName).toBe('BUTTON')
     expect(info.id).toBe('submit-btn')
     expect(info.className).toBe('btn primary')
-    expect(info.text).toBe('Submit Form')
+    expect(info.textContent).toBe('Submit Form')
     expect(info.href).toBeNull()
     expect(info.role).toBeNull()
-    expect(info.type).toBeNull()
+    expect(info.inputType).toBeNull()
   })
 
   it('extracts href from anchor element', () => {
@@ -33,7 +33,7 @@ describe('extractElementInfo', () => {
     el.type = 'email'
 
     const info = extractElementInfo(el)
-    expect(info.type).toBe('email')
+    expect(info.inputType).toBe('email')
   })
 
   it('extracts role attribute', () => {
@@ -58,6 +58,6 @@ describe('extractElementInfo', () => {
     el.textContent = 'a'.repeat(200)
 
     const info = extractElementInfo(el)
-    expect(info.text).toHaveLength(100)
+    expect(info.textContent).toHaveLength(100)
   })
 })
