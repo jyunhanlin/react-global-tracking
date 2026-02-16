@@ -43,11 +43,8 @@ interface GetTrackableElementParams {
   readonly eventType: string
 }
 
-export function getTrackableElement(params: GetTrackableElementParams): HTMLElement | null {
+export function getTrackableElement(params: GetTrackableElementParams): Element | null {
   const { target, ignoreSelectors, eventType } = params
-
-  if (!(target instanceof HTMLElement)) return null
-
   const category = getEventCategory(eventType)
 
   switch (category) {
@@ -61,11 +58,11 @@ export function getTrackableElement(params: GetTrackableElementParams): HTMLElem
 }
 
 function findPointerTarget(
-  target: HTMLElement,
+  target: Element,
   ignoreSelectors: readonly string[],
   eventType: string,
-): HTMLElement | null {
-  let current: HTMLElement | null = target
+): Element | null {
+  let current: Element | null = target
   let depth = 0
 
   while (current !== null && depth <= MAX_ANCESTOR_DEPTH) {
@@ -80,23 +77,23 @@ function findPointerTarget(
 }
 
 function filterFormTarget(
-  target: HTMLElement,
+  target: Element,
   ignoreSelectors: readonly string[],
-): HTMLElement | null {
+): Element | null {
   if (isIgnored({ element: target, ignoreSelectors })) return null
   if (isDisabled(target)) return null
   return target
 }
 
 function filterAmbientTarget(
-  target: HTMLElement,
+  target: Element,
   ignoreSelectors: readonly string[],
-): HTMLElement | null {
+): Element | null {
   if (isIgnored({ element: target, ignoreSelectors })) return null
   return target
 }
 
-function isInteractiveElement(el: HTMLElement, eventType: string): boolean {
+function isInteractiveElement(el: Element, eventType: string): boolean {
   // 1. Semantic tag
   if (INTERACTIVE_TAGS.has(el.tagName)) return true
 
@@ -128,6 +125,6 @@ export function isIgnored(params: {
   return params.ignoreSelectors.some((selector) => params.element.matches(selector))
 }
 
-export function isDisabled(el: HTMLElement): boolean {
+export function isDisabled(el: Element): boolean {
   return el.hasAttribute('disabled') || el.getAttribute('aria-disabled') === 'true'
 }

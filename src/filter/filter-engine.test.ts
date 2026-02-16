@@ -121,6 +121,19 @@ describe('getTrackableElement', () => {
       button.remove()
     })
 
+    it('walks up from SVG child to find interactive ancestor', () => {
+      const button = document.createElement('button')
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+      svg.appendChild(path)
+      button.appendChild(svg)
+      document.body.appendChild(button)
+
+      const result = getTrackableElement({ target: path, ignoreSelectors: [], eventType: 'click' })
+      expect(result).toBe(button)
+      button.remove()
+    })
+
     it('returns null for non-interactive element', () => {
       const el = document.createElement('div')
       document.body.appendChild(el)
