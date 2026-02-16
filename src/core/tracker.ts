@@ -13,6 +13,9 @@ export function createTracker(config?: TrackerConfig): Tracker {
   const domListeners = new Map<string, (event: Event) => void>()
   let destroyed = false
 
+  // Lazily attaches one capture-phase listener per event type on document.
+  // Multiple on() calls for the same type share a single DOM listener;
+  // the pipeline fans out to all registered callbacks internally.
   function ensureDomListener(eventType: string): void {
     if (domListeners.has(eventType)) return
 
