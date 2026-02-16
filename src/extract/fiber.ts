@@ -60,21 +60,19 @@ export function extractFiberInfo(rawFiber: object | null): FiberInfo | null {
   if (rawFiber === null) return null
 
   const fiber = rawFiber as FiberNode
-  return findNearestComponent(fiber)
+  return {
+    componentName: findNearestComponentName(fiber),
+    props: fiber.memoizedProps ?? {},
+  }
 }
 
-function findNearestComponent(fiber: FiberNode): FiberInfo | null {
+function findNearestComponentName(fiber: FiberNode): string | null {
   let current: FiberNode | null = fiber.return
   let depth = 0
 
   while (current !== null && depth < MAX_STACK_DEPTH) {
     const name = getComponentName(current)
-    if (name !== null) {
-      return {
-        componentName: name,
-        props: current.memoizedProps ?? {},
-      }
-    }
+    if (name !== null) return name
     current = current.return
     depth++
   }
