@@ -29,7 +29,11 @@
     "lint": "oxlint src/",
     "format": "oxfmt --write src/",
     "format:check": "oxfmt --check src/",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "check": "pnpm lint && pnpm format:check && pnpm typecheck"
+  },
+  "simple-git-hooks": {
+    "pre-push": "pnpm check"
   },
   "license": "MIT",
   "engines": {
@@ -48,6 +52,7 @@
     "jsdom": "^28.1.0",
     "oxfmt": "^0.32.0",
     "oxlint": "^1.47.0",
+    "simple-git-hooks": "^2.13.1",
     "tsdown": "^0.20.3",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
