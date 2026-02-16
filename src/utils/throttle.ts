@@ -1,9 +1,11 @@
-interface ThrottledFn<T extends (...args: unknown[]) => void> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+interface ThrottledFn<T extends (...args: any[]) => void> {
   (...args: Parameters<T>): void
   cancel(): void
 }
 
-export function throttle<T extends (...args: unknown[]) => void>(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function throttle<T extends (...args: any[]) => void>(
   fn: T,
   ms: number,
 ): ThrottledFn<T> {

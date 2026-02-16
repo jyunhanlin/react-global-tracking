@@ -148,7 +148,7 @@ describe('getTrackableElement', () => {
     })
 
     it('stops ancestor walk after 10 levels', () => {
-      let current = document.createElement('button')
+      let current: HTMLElement = document.createElement('button')
       const root = current
       for (let i = 0; i < 15; i++) {
         const child = document.createElement('div')
