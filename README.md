@@ -81,11 +81,12 @@ Each callback receives a `TrackEvent`:
 
 ```ts
 interface TrackEvent {
-  eventType: string      // 'click', 'input', 'scroll', etc.
+  eventType: string        // 'click', 'input', 'scroll', etc.
   timestamp: number
-  target: ElementInfo
+  targetElement: Element   // resolved DOM element (may differ from event.target)
+  target: ElementInfo      // extracted metadata
   fiber: FiberInfo | null
-  nativeEvent: Event     // original DOM event
+  nativeEvent: Event       // original DOM event
   rawFiber: object | null
 }
 
@@ -102,7 +103,7 @@ interface ElementInfo {
 
 interface FiberInfo {
   componentName: string | null       // nearest React component
-  ancestorComponents: string[]       // ['SubmitButton', 'Form', 'App']
+  componentStack: string[]            // ['SubmitButton', 'Form', 'App']
   eventHandlers: string[]            // ['onClick', 'onMouseEnter']
 }
 ```

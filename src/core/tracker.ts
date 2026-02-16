@@ -80,7 +80,6 @@ function resolveConfig(config?: TrackerConfig): ResolvedConfig {
   return {
     enabled: config?.enabled ?? true,
     ignoreSelectors: config?.ignoreSelectors ?? [],
-    includeSelectors: config?.includeSelectors ?? null,
     debug: config?.debug ?? false,
   }
 }

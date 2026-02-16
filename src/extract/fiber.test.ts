@@ -155,7 +155,8 @@ describe('extractFiberInfo', () => {
     })
 
     const info = extractFiberInfo(hostFiber)
-    expect(info?.ancestorComponents).toEqual(['SubmitButton', 'Form', 'App'])
+    expect(info?.componentName).toBe('SubmitButton')
+    expect(info?.componentStack).toEqual(['SubmitButton', 'Form', 'App'])
   })
 
   it('skips non-component fiber nodes in stack', () => {
@@ -174,6 +175,7 @@ describe('extractFiberInfo', () => {
     })
 
     const info = extractFiberInfo(btnFiber)
-    expect(info?.ancestorComponents).toEqual(['App'])
+    expect(info?.componentName).toBe('App')
+    expect(info?.componentStack).toEqual(['App'])
   })
 })

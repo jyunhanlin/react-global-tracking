@@ -50,10 +50,9 @@ export function createRegistry(): Registry {
       for (const entry of entries) {
         if (entry.eventType !== event.eventType) continue
 
-        // selector check
+        // selector check — uses the resolved trackable element, not the raw event target
         if (entry.options.selector != null) {
-          const target = event.nativeEvent.target
-          if (!(target instanceof Element) || !target.matches(entry.options.selector)) {
+          if (!event.targetElement.matches(entry.options.selector)) {
             continue
           }
         }

@@ -7,7 +7,6 @@ function makeConfig(overrides: Partial<ResolvedConfig> = {}): ResolvedConfig {
   return {
     enabled: true,
     ignoreSelectors: [],
-    includeSelectors: null,
     debug: false,
     ...overrides,
   }

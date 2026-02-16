@@ -43,7 +43,7 @@ interface GetTrackableElementParams {
   readonly eventType: string
 }
 
-export function getTrackableElement(params: GetTrackableElementParams): Element | null {
+export function findTrackableElement(params: GetTrackableElementParams): Element | null {
   const { target, ignoreSelectors, eventType } = params
   const category = getEventCategory(eventType)
 
@@ -51,9 +51,9 @@ export function getTrackableElement(params: GetTrackableElementParams): Element 
     case EventCategory.Pointer:
       return findPointerTarget(target, ignoreSelectors, eventType)
     case EventCategory.Form:
-      return filterFormTarget(target, ignoreSelectors)
+      return findFormTarget(target, ignoreSelectors)
     case EventCategory.Ambient:
-      return filterAmbientTarget(target, ignoreSelectors)
+      return findAmbientTarget(target, ignoreSelectors)
   }
 }
 
@@ -76,7 +76,7 @@ function findPointerTarget(
   return null
 }
 
-function filterFormTarget(
+function findFormTarget(
   target: Element,
   ignoreSelectors: readonly string[],
 ): Element | null {
@@ -85,7 +85,7 @@ function filterFormTarget(
   return target
 }
 
-function filterAmbientTarget(
+function findAmbientTarget(
   target: Element,
   ignoreSelectors: readonly string[],
 ): Element | null {

@@ -8,12 +8,12 @@ export function extractElementInfo(element: Element): ElementInfo {
   return {
     tagName: element.tagName,
     id: element.id,
-    className: element.className ?? '',
+    className: element.getAttribute('class') ?? '',
     textContent: text.length > MAX_TEXT_LENGTH ? text.slice(0, MAX_TEXT_LENGTH) : text,
     href: isAnchorElement(element) ? element.href : null,
     role: element.getAttribute('role'),
     inputType: isInputElement(element) ? element.type : null,
-    dataset: extractDataset((element as HTMLElement).dataset),
+    dataset: 'dataset' in element ? extractDataset((element as HTMLElement).dataset) : {},
   }
 }
 

@@ -6,8 +6,11 @@ export const EventCategory = {
 
 export type EventCategory = (typeof EventCategory)[keyof typeof EventCategory]
 
+// Maps DOM event types to React handler prop names used to detect interactivity.
+// For click, we include mouse/pointer handlers because an element with only
+// onMouseDown (no onClick) is still interactive from a tracking perspective.
 const EVENT_HANDLER_MAP: Readonly<Record<string, readonly string[]>> = {
-  // Pointer
+  // Pointer — includes related mouse/pointer handlers to catch all interactive patterns
   click: ['onClick', 'onMouseDown', 'onMouseUp', 'onPointerDown', 'onPointerUp'],
   touchstart: ['onTouchStart'],
   touchend: ['onTouchEnd'],

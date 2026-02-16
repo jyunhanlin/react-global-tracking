@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { getTrackableElement, isIgnored, isDisabled } from './filter-engine'
+import { findTrackableElement, isIgnored, isDisabled } from './filter-engine'
 import { resetFiberKeyCache } from '../extract/fiber'
 
 describe('isIgnored', () => {
@@ -40,7 +40,7 @@ describe('isDisabled', () => {
   })
 })
 
-describe('getTrackableElement', () => {
+describe('findTrackableElement', () => {
   beforeEach(() => {
     resetFiberKeyCache()
   })
@@ -50,7 +50,7 @@ describe('getTrackableElement', () => {
       const el = document.createElement('button')
       document.body.appendChild(el)
 
-      const result = getTrackableElement({ target: el, ignoreSelectors: [], eventType: 'click' })
+      const result = findTrackableElement({ target: el, ignoreSelectors: [], eventType: 'click' })
       expect(result).toBe(el)
       el.remove()
     })
@@ -60,7 +60,7 @@ describe('getTrackableElement', () => {
       el.setAttribute('role', 'button')
       document.body.appendChild(el)
 
-      const result = getTrackableElement({ target: el, ignoreSelectors: [], eventType: 'click' })
+      const result = findTrackableElement({ target: el, ignoreSelectors: [], eventType: 'click' })
       expect(result).toBe(el)
       el.remove()
     })
@@ -69,7 +69,7 @@ describe('getTrackableElement', () => {
       const el = document.createElement('summary')
       document.body.appendChild(el)
 
-      const result = getTrackableElement({ target: el, ignoreSelectors: [], eventType: 'click' })
+      const result = findTrackableElement({ target: el, ignoreSelectors: [], eventType: 'click' })
       expect(result).toBe(el)
       el.remove()
     })
@@ -78,7 +78,7 @@ describe('getTrackableElement', () => {
       const el = document.createElement('details')
       document.body.appendChild(el)
 
-      const result = getTrackableElement({ target: el, ignoreSelectors: [], eventType: 'click' })
+      const result = findTrackableElement({ target: el, ignoreSelectors: [], eventType: 'click' })
       expect(result).toBe(el)
       el.remove()
     })
@@ -90,7 +90,7 @@ describe('getTrackableElement', () => {
         el.setAttribute('role', role)
         document.body.appendChild(el)
 
-        const result = getTrackableElement({ target: el, ignoreSelectors: [], eventType: 'click' })
+        const result = findTrackableElement({ target: el, ignoreSelectors: [], eventType: 'click' })
         expect(result).toBe(el)
         el.remove()
       },
@@ -105,7 +105,7 @@ describe('getTrackableElement', () => {
         return: null,
       }
 
-      const result = getTrackableElement({ target: el, ignoreSelectors: [], eventType: 'click' })
+      const result = findTrackableElement({ target: el, ignoreSelectors: [], eventType: 'click' })
       expect(result).toBe(el)
       el.remove()
     })
@@ -116,7 +116,7 @@ describe('getTrackableElement', () => {
       button.appendChild(span)
       document.body.appendChild(button)
 
-      const result = getTrackableElement({ target: span, ignoreSelectors: [], eventType: 'click' })
+      const result = findTrackableElement({ target: span, ignoreSelectors: [], eventType: 'click' })
       expect(result).toBe(button)
       button.remove()
     })
@@ -129,7 +129,7 @@ describe('getTrackableElement', () => {
       button.appendChild(svg)
       document.body.appendChild(button)
 
-      const result = getTrackableElement({ target: path, ignoreSelectors: [], eventType: 'click' })
+      const result = findTrackableElement({ target: path, ignoreSelectors: [], eventType: 'click' })
       expect(result).toBe(button)
       button.remove()
     })
@@ -138,7 +138,7 @@ describe('getTrackableElement', () => {
       const el = document.createElement('div')
       document.body.appendChild(el)
 
-      const result = getTrackableElement({ target: el, ignoreSelectors: [], eventType: 'click' })
+      const result = findTrackableElement({ target: el, ignoreSelectors: [], eventType: 'click' })
       expect(result).toBeNull()
       el.remove()
     })
@@ -148,7 +148,7 @@ describe('getTrackableElement', () => {
       el.className = 'no-track'
       document.body.appendChild(el)
 
-      const result = getTrackableElement({
+      const result = findTrackableElement({
         target: el,
         ignoreSelectors: ['.no-track'],
         eventType: 'click',
@@ -162,7 +162,7 @@ describe('getTrackableElement', () => {
       el.setAttribute('disabled', '')
       document.body.appendChild(el)
 
-      const result = getTrackableElement({ target: el, ignoreSelectors: [], eventType: 'click' })
+      const result = findTrackableElement({ target: el, ignoreSelectors: [], eventType: 'click' })
       expect(result).toBeNull()
       el.remove()
     })
@@ -177,7 +177,7 @@ describe('getTrackableElement', () => {
       }
       document.body.appendChild(root)
 
-      const result = getTrackableElement({
+      const result = findTrackableElement({
         target: current,
         ignoreSelectors: [],
         eventType: 'click',
@@ -192,7 +192,7 @@ describe('getTrackableElement', () => {
       const el = document.createElement('input')
       document.body.appendChild(el)
 
-      const result = getTrackableElement({ target: el, ignoreSelectors: [], eventType: 'input' })
+      const result = findTrackableElement({ target: el, ignoreSelectors: [], eventType: 'input' })
       expect(result).toBe(el)
       el.remove()
     })
@@ -202,7 +202,7 @@ describe('getTrackableElement', () => {
       el.className = 'no-track'
       document.body.appendChild(el)
 
-      const result = getTrackableElement({
+      const result = findTrackableElement({
         target: el,
         ignoreSelectors: ['.no-track'],
         eventType: 'change',
@@ -216,7 +216,7 @@ describe('getTrackableElement', () => {
       el.setAttribute('disabled', '')
       document.body.appendChild(el)
 
-      const result = getTrackableElement({ target: el, ignoreSelectors: [], eventType: 'focus' })
+      const result = findTrackableElement({ target: el, ignoreSelectors: [], eventType: 'focus' })
       expect(result).toBeNull()
       el.remove()
     })
@@ -227,7 +227,7 @@ describe('getTrackableElement', () => {
       const el = document.createElement('div')
       document.body.appendChild(el)
 
-      const result = getTrackableElement({ target: el, ignoreSelectors: [], eventType: 'scroll' })
+      const result = findTrackableElement({ target: el, ignoreSelectors: [], eventType: 'scroll' })
       expect(result).toBe(el)
       el.remove()
     })
@@ -237,7 +237,7 @@ describe('getTrackableElement', () => {
       el.className = 'no-track'
       document.body.appendChild(el)
 
-      const result = getTrackableElement({
+      const result = findTrackableElement({
         target: el,
         ignoreSelectors: ['.no-track'],
         eventType: 'keydown',
@@ -251,7 +251,7 @@ describe('getTrackableElement', () => {
       el.setAttribute('disabled', '')
       document.body.appendChild(el)
 
-      const result = getTrackableElement({ target: el, ignoreSelectors: [], eventType: 'scroll' })
+      const result = findTrackableElement({ target: el, ignoreSelectors: [], eventType: 'scroll' })
       expect(result).toBe(el)
       el.remove()
     })

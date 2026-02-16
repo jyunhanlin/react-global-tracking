@@ -1,7 +1,7 @@
 import type { ResolvedConfig, TrackEvent, TrackCallback, ListenerOptions } from '../types'
 import { extractElementInfo } from '../extract/element'
 import { resolveFiber, extractFiberInfo } from '../extract/fiber'
-import { getTrackableElement } from '../filter/filter-engine'
+import { findTrackableElement } from '../filter/filter-engine'
 import { createRegistry } from './registry'
 
 export interface Pipeline {
@@ -24,7 +24,7 @@ export function createPipeline(config: ResolvedConfig): Pipeline {
       if (!(target instanceof Element)) return
 
       // Filter: find trackable element based on event category
-      const trackableElement = getTrackableElement({
+      const trackableElement = findTrackableElement({
         target,
         ignoreSelectors: config.ignoreSelectors,
         eventType: domEvent.type,
@@ -40,6 +40,7 @@ export function createPipeline(config: ResolvedConfig): Pipeline {
       const trackEvent: TrackEvent = {
         eventType: domEvent.type,
         timestamp: Date.now(),
+        targetElement: trackableElement,
         target: elementInfo,
         fiber: fiberInfo,
         nativeEvent: domEvent,

@@ -3,7 +3,6 @@
 export interface TrackerConfig {
   readonly enabled?: boolean
   readonly ignoreSelectors?: readonly string[]
-  readonly includeSelectors?: readonly string[]
   readonly debug?: boolean
 }
 
@@ -23,6 +22,7 @@ export interface ListenerOptions {
 export interface TrackEvent {
   readonly eventType: string
   readonly timestamp: number
+  readonly targetElement: Element
   readonly target: ElementInfo
   readonly fiber: FiberInfo | null
   readonly nativeEvent: Event
@@ -42,7 +42,7 @@ export interface ElementInfo {
 
 export interface FiberInfo {
   readonly componentName: string | null
-  readonly ancestorComponents: readonly string[]
+  readonly componentStack: readonly string[]
   readonly eventHandlers: readonly string[]
 }
 
@@ -53,12 +53,5 @@ export type TrackCallback = (event: TrackEvent) => void
 export interface ResolvedConfig {
   readonly enabled: boolean
   readonly ignoreSelectors: readonly string[]
-  readonly includeSelectors: readonly string[] | null
   readonly debug: boolean
-}
-
-export interface ListenerEntry {
-  readonly eventType: string
-  readonly callback: TrackCallback
-  readonly options: ListenerOptions
 }

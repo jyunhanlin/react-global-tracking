@@ -2,10 +2,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { createRegistry } from './registry'
 import type { TrackEvent } from '../types'
 
-function fakeEvent(eventType: string = 'click'): TrackEvent {
+function fakeEvent(eventType: string = 'click', targetElement?: Element): TrackEvent {
+  const el = targetElement ?? document.createElement('button')
   return {
     eventType,
     timestamp: Date.now(),
+    targetElement: el,
     target: {
       tagName: 'BUTTON',
       id: '',
@@ -119,7 +121,7 @@ describe('createRegistry', () => {
     expect(cb).toHaveBeenCalledOnce()
   })
 
-  it('applies selector option — only fires when target matches', () => {
+  it('applies selector option — only fires when targetElement matches', () => {
     const registry = createRegistry()
     const cb = vi.fn()
 
@@ -130,20 +132,13 @@ describe('createRegistry', () => {
     nav.appendChild(navLink)
     document.body.appendChild(nav)
 
-    const matchingEvent = fakeEvent('click')
-    Object.defineProperty(matchingEvent, 'nativeEvent', {
-      value: { target: navLink },
-    })
-    registry.invoke(matchingEvent)
+    // targetElement is the resolved trackable element, not nativeEvent.target
+    registry.invoke(fakeEvent('click', navLink))
     expect(cb).toHaveBeenCalledOnce()
 
     const div = document.createElement('div')
     document.body.appendChild(div)
-    const nonMatchingEvent = fakeEvent('click')
-    Object.defineProperty(nonMatchingEvent, 'nativeEvent', {
-      value: { target: div },
-    })
-    registry.invoke(nonMatchingEvent)
+    registry.invoke(fakeEvent('click', div))
     expect(cb).toHaveBeenCalledOnce() // still 1 — not called again
 
     nav.remove()
