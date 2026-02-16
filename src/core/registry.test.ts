@@ -5,22 +5,9 @@ import type { TrackEvent } from '../types'
 function fakeEvent(eventType: string = 'click', targetElement?: Element): TrackEvent {
   const el = targetElement ?? document.createElement('button')
   return {
-    eventType,
-    timestamp: Date.now(),
-    targetElement: el,
-    elementInfo: {
-      tagName: 'BUTTON',
-      id: '',
-      className: '',
-      textContent: '',
-      href: null,
-      role: null,
-      inputType: null,
-      dataset: {},
-    },
-    fiber: null,
     nativeEvent: new Event(eventType),
-    rawFiber: null,
+    targetElement: el,
+    fiber: null,
   }
 }
 

@@ -9,6 +9,15 @@ import { createPipeline } from './pipeline'
 
 export function createTracker(config?: TrackerConfig): Tracker {
   const resolved = resolveConfig(config)
+
+  if (!resolved.enabled) {
+    return {
+      on: () => () => {},
+      getLastEvent: () => null,
+      destroy: () => {},
+    }
+  }
+
   const pipeline = createPipeline(resolved)
   const domListeners = new Map<string, (event: Event) => void>()
   let destroyed = false

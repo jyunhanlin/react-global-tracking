@@ -46,10 +46,10 @@ describe('createPipeline', () => {
 
     expect(callback).toHaveBeenCalledOnce()
     const trackEvent = callback.mock.calls[0][0]
-    expect(trackEvent.eventType).toBe('click')
-    expect(trackEvent.elementInfo.tagName).toBe('BUTTON')
+    expect(trackEvent.nativeEvent.type).toBe('click')
+    expect(trackEvent.targetElement).toBe(button)
     expect(trackEvent.fiber?.componentName).toBe('SubmitButton')
-    expect(trackEvent.fiber?.eventHandlers).toContain('onClick')
+    expect(trackEvent.fiber?.props).toEqual({})
 
     button.remove()
   })
@@ -141,26 +141,8 @@ describe('createPipeline', () => {
     pipeline.handleEvent(event)
 
     expect(pipeline.getLastEvent()).not.toBeNull()
-    expect(pipeline.getLastEvent()?.eventType).toBe('click')
+    expect(pipeline.getLastEvent()?.nativeEvent.type).toBe('click')
 
-    button.remove()
-  })
-
-  it('does nothing when disabled', () => {
-    const config = makeConfig({ enabled: false })
-    const pipeline = createPipeline(config)
-    const callback = vi.fn()
-
-    pipeline.addListener('click', callback, {})
-
-    const button = document.createElement('button')
-    document.body.appendChild(button)
-
-    const event = new MouseEvent('click', { bubbles: true })
-    Object.defineProperty(event, 'target', { value: button })
-    pipeline.handleEvent(event)
-
-    expect(callback).not.toHaveBeenCalled()
     button.remove()
   })
 })

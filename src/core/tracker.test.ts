@@ -74,26 +74,32 @@ describe('createTracker', () => {
     button.click()
 
     expect(cb).toHaveBeenCalledOnce()
-    expect(tracker.getLastEvent()?.eventType).toBe('click')
+    expect(tracker.getLastEvent()?.nativeEvent.type).toBe('click')
 
     button.remove()
     tracker.destroy()
   })
 
-  it('respects enabled: false config', () => {
+  it('respects enabled: false config — no DOM listeners attached', () => {
+    const addSpy = vi.spyOn(document, 'addEventListener')
     const tracker = createTracker({ enabled: false })
     const cb = vi.fn()
 
     tracker.on('click', cb)
+
+    // No DOM listener should be attached at all
+    expect(addSpy).not.toHaveBeenCalled()
 
     const button = document.createElement('button')
     document.body.appendChild(button)
     button.click()
 
     expect(cb).not.toHaveBeenCalled()
+    expect(tracker.getLastEvent()).toBeNull()
 
     button.remove()
     tracker.destroy()
+    addSpy.mockRestore()
   })
 
   it('destroy prevents further tracking', () => {

@@ -20,30 +20,14 @@ export interface ListenerOptions {
 }
 
 export interface TrackEvent {
-  readonly eventType: string
-  readonly timestamp: number
-  readonly targetElement: Element
-  readonly elementInfo: ElementInfo
-  readonly fiber: FiberInfo | null
   readonly nativeEvent: Event
-  readonly rawFiber: object | null
-}
-
-export interface ElementInfo {
-  readonly tagName: string
-  readonly id: string
-  readonly className: string
-  readonly textContent: string
-  readonly href: string | null
-  readonly role: string | null
-  readonly inputType: string | null
-  readonly dataset: Readonly<Record<string, string>>
+  readonly targetElement: Element
+  readonly fiber: FiberInfo | null
 }
 
 export interface FiberInfo {
   readonly componentName: string | null
-  readonly componentStack: readonly string[]
-  readonly eventHandlers: readonly string[]
+  readonly props: Readonly<Record<string, unknown>>
 }
 
 export type TrackCallback = (event: TrackEvent) => void

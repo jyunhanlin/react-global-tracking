@@ -5,7 +5,7 @@ Global user interaction tracking for React apps (16–19). Captures clicks, form
 ## Features
 
 - **Zero-config** — works with any React 16–19 app, no provider or HOC needed
-- **Fiber introspection** — automatically resolves component names, component stacks, and event handlers from React internals
+- **Fiber introspection** — automatically resolves the nearest React component name and props
 - **Smart filtering** — only tracks interactive elements (buttons, links, ARIA roles, elements with React handlers)
 - **Three event categories** — Pointer (click), Form (input/change/focus/blur), Ambient (scroll/keydown/keyup)
 - **Listener options** — debounce, throttle, once, CSS selector filtering
@@ -26,9 +26,9 @@ const tracker = init()
 
 // Track all clicks on interactive elements
 const unsubscribe = tracker.on('click', (event) => {
-  console.log(event.elementInfo.tagName)      // 'BUTTON'
+  console.log(event.targetElement.tagName)   // 'BUTTON'
   console.log(event.fiber?.componentName)    // 'SubmitButton'
-  console.log(event.fiber?.eventHandlers)    // ['onClick']
+  console.log(event.fiber?.props)            // { variant: 'primary', onClick: [Function] }
 })
 
 // Clean up
@@ -81,32 +81,18 @@ Each callback receives a `TrackEvent`:
 
 ```ts
 interface TrackEvent {
-  eventType: string      // 'click', 'input', 'scroll', etc.
-  timestamp: number
-  targetElement: Element // resolved DOM element (may differ from nativeEvent.target)
-  elementInfo: ElementInfo
-  fiber: FiberInfo | null
   nativeEvent: Event     // original DOM event
-  rawFiber: object | null
-}
-
-interface ElementInfo {
-  tagName: string
-  id: string
-  className: string
-  textContent: string    // trimmed, max 100 chars
-  href: string | null
-  role: string | null
-  inputType: string | null
-  dataset: Record<string, string>
+  targetElement: Element // resolved trackable element (may differ from nativeEvent.target)
+  fiber: FiberInfo | null
 }
 
 interface FiberInfo {
-  componentName: string | null       // nearest React component
-  componentStack: string[]            // ['SubmitButton', 'Form', 'App']
-  eventHandlers: string[]            // ['onClick', 'onMouseEnter']
+  componentName: string | null              // nearest React component
+  props: Readonly<Record<string, unknown>>  // component props (original types, not stringified)
 }
 ```
+
+The library intentionally keeps `TrackEvent` minimal — use `nativeEvent` and `targetElement` to extract any DOM information you need, and `fiber.props` to access rich, typed data from React components (avoiding the `[object Object]` problem of HTML `data-*` attributes).
 
 ## Event Categories
 
@@ -120,8 +106,8 @@ interface FiberInfo {
 
 1. **DOM delegation** — attaches a single capture-phase listener per event type on `document`
 2. **Filtering** — determines if the target (or ancestor) is interactive based on HTML semantics, ARIA roles, or React fiber props
-3. **Extraction** — reads element attributes and walks the React fiber tree for component context
-4. **Dispatch** — invokes all registered callbacks with the enriched `TrackEvent`
+3. **Fiber resolution** — finds the nearest React component and extracts its name and props
+4. **Dispatch** — invokes all registered callbacks with the `TrackEvent`
 
 Capture phase (`addEventListener(..., true)`) ensures events are caught even if `stopPropagation()` is called downstream.
 

@@ -3,7 +3,6 @@ export type {
   Tracker,
   TrackerConfig,
   TrackEvent,
-  ElementInfo,
   FiberInfo,
   ListenerOptions,
   TrackCallback,

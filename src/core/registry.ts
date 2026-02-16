@@ -48,7 +48,7 @@ export function createRegistry(): Registry {
 
     invoke(event: TrackEvent): void {
       for (const entry of entries) {
-        if (entry.eventType !== event.eventType) continue
+        if (entry.eventType !== event.nativeEvent.type) continue
 
         // selector check — uses the resolved trackable element, not the raw event target
         if (entry.options.selector != null) {

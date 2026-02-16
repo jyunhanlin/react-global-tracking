@@ -122,60 +122,43 @@ describe('extractFiberInfo', () => {
     expect(info?.componentName).toBe('CustomName')
   })
 
-  it('extracts event handlers from memoizedProps', () => {
+  it('extracts props from nearest component', () => {
     const fiber = createFiber({
-      memoizedProps: {
-        onClick: () => {},
-        onMouseDown: () => {},
-        className: 'btn',
-        children: 'Click me',
-      },
+      return: createFiber({
+        type: function MyButton() {},
+        memoizedProps: { variant: 'primary', size: 'lg', data: { id: 123 } },
+      }),
     })
 
     const info = extractFiberInfo(fiber)
-    expect(info?.eventHandlers).toEqual(['onClick', 'onMouseDown'])
+    expect(info?.props).toEqual({ variant: 'primary', size: 'lg', data: { id: 123 } })
   })
 
-  it('builds component stack from fiber tree', () => {
-    const appFiber = createFiber({
-      type: function App() {},
-      return: null,
-    })
-    const formFiber = createFiber({
-      type: function Form() {},
-      return: appFiber,
-    })
-    const buttonFiber = createFiber({
-      type: function SubmitButton() {},
-      return: formFiber,
-    })
-    const hostFiber = createFiber({
-      type: 'button',
-      return: buttonFiber,
+  it('returns null when no component found in fiber tree', () => {
+    const fiber = createFiber({
+      return: createFiber({ type: 'div', return: null }),
     })
 
-    const info = extractFiberInfo(hostFiber)
-    expect(info?.componentName).toBe('SubmitButton')
-    expect(info?.componentStack).toEqual(['SubmitButton', 'Form', 'App'])
+    expect(extractFiberInfo(fiber)).toBeNull()
   })
 
-  it('skips non-component fiber nodes in stack', () => {
+  it('skips host elements and finds nearest component', () => {
     const appFiber = createFiber({
       type: function App() {},
+      memoizedProps: { title: 'My App' },
       return: null,
     })
-    // host element fiber (string type) should be skipped
     const divFiber = createFiber({
       type: 'div',
       return: appFiber,
     })
-    const btnFiber = createFiber({
-      type: function Button() {},
+    const hostFiber = createFiber({
+      type: 'button',
       return: divFiber,
     })
 
-    const info = extractFiberInfo(btnFiber)
+    const info = extractFiberInfo(hostFiber)
     expect(info?.componentName).toBe('App')
-    expect(info?.componentStack).toEqual(['App'])
+    expect(info?.props).toEqual({ title: 'My App' })
   })
 })

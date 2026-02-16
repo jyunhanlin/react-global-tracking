@@ -49,7 +49,6 @@ export function resetFiberKeyCache(): void {
 // === Extractor: raw fiber node → FiberInfo ===
 
 const MAX_STACK_DEPTH = 50
-const HANDLER_PREFIX = 'on'
 
 interface FiberNode {
   type: unknown
@@ -61,47 +60,26 @@ export function extractFiberInfo(rawFiber: object | null): FiberInfo | null {
   if (rawFiber === null) return null
 
   const fiber = rawFiber as FiberNode
-  const eventHandlers = extractHandlers(fiber)
-  const { componentName, componentStack } = extractComponentInfo(fiber)
-
-  return {
-    componentName,
-    componentStack,
-    eventHandlers,
-  }
+  return findNearestComponent(fiber)
 }
 
-function extractHandlers(fiber: FiberNode): string[] {
-  const props = fiber.memoizedProps
-  if (props === null || props === undefined) return []
-
-  return Object.keys(props).filter(
-    (key) => key.startsWith(HANDLER_PREFIX) && typeof props[key] === 'function',
-  )
-}
-
-function extractComponentInfo(fiber: FiberNode): {
-  componentName: string | null
-  componentStack: string[]
-} {
-  const stack: string[] = []
-  let componentName: string | null = null
+function findNearestComponent(fiber: FiberNode): FiberInfo | null {
   let current: FiberNode | null = fiber.return
   let depth = 0
 
   while (current !== null && depth < MAX_STACK_DEPTH) {
     const name = getComponentName(current)
     if (name !== null) {
-      if (componentName === null) {
-        componentName = name
+      return {
+        componentName: name,
+        props: current.memoizedProps ?? {},
       }
-      stack.push(name)
     }
     current = current.return
     depth++
   }
 
-  return { componentName, componentStack: stack }
+  return null
 }
 
 function getComponentName(fiber: FiberNode): string | null {
