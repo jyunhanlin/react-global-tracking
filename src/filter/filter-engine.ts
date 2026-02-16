@@ -88,10 +88,7 @@ function findPointerTarget(
   return null
 }
 
-function findFormTarget(
-  target: Element,
-  ignoreSelectors: readonly string[],
-): FilterResult | null {
+function findFormTarget(target: Element, ignoreSelectors: readonly string[]): FilterResult | null {
   if (isIgnored(target, ignoreSelectors)) return null
   if (isDisabled(target)) return null
   return { element: target, fiber: extractFiberInfo(resolveFiber(target)) }
