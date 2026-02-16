@@ -76,19 +76,13 @@ function findPointerTarget(
   return null
 }
 
-function findFormTarget(
-  target: Element,
-  ignoreSelectors: readonly string[],
-): Element | null {
+function findFormTarget(target: Element, ignoreSelectors: readonly string[]): Element | null {
   if (isIgnored({ element: target, ignoreSelectors })) return null
   if (isDisabled(target)) return null
   return target
 }
 
-function findAmbientTarget(
-  target: Element,
-  ignoreSelectors: readonly string[],
-): Element | null {
+function findAmbientTarget(target: Element, ignoreSelectors: readonly string[]): Element | null {
   if (isIgnored({ element: target, ignoreSelectors })) return null
   return target
 }
