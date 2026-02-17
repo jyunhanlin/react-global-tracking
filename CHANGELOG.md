@@ -1,5 +1,11 @@
 # react-global-tracking
 
+## 0.1.3
+
+### Patch Changes
+
+- Add react and react-dom as peer dependencies to explicitly declare runtime dependency on React
+
 ## 0.1.2
 
 ### Patch Changes
