@@ -1,7 +1,7 @@
 import type { TrackEvent, TrackCallback, ListenerOptions } from '../types'
 import { debounce } from '../utils/debounce'
 import { throttle } from '../utils/throttle'
-import { safeMatches } from '../utils/safe-matches'
+import { safeMatches } from '../utils/safe-selector'
 
 interface RegistryEntry {
   readonly eventType: string

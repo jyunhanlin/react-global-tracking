@@ -27,6 +27,17 @@ describe('isIgnored', () => {
     expect(isIgnored(el, ['[invalid'])).toBe(false)
     el.remove()
   })
+
+  it('returns true when element is inside an ignored container', () => {
+    const container = document.createElement('div')
+    container.className = 'no-track'
+    const child = document.createElement('input')
+    container.appendChild(child)
+    document.body.appendChild(container)
+
+    expect(isIgnored(child, ['.no-track'])).toBe(true)
+    container.remove()
+  })
 })
 
 describe('isDisabled', () => {
@@ -179,6 +190,18 @@ describe('findTrackableElement', () => {
       el.remove()
     })
 
+    it('excludes elements inside an ignored container', () => {
+      const container = document.createElement('div')
+      container.className = 'no-track'
+      const button = document.createElement('button')
+      container.appendChild(button)
+      document.body.appendChild(container)
+
+      const result = find({ target: button, ignoreSelectors: ['.no-track'], eventType: 'click' })
+      expect(result).toBeNull()
+      container.remove()
+    })
+
     it('excludes disabled elements', () => {
       const el = document.createElement('button')
       el.setAttribute('disabled', '')
@@ -225,6 +248,18 @@ describe('findTrackableElement', () => {
       el.remove()
     })
 
+    it('excludes elements inside an ignored container', () => {
+      const container = document.createElement('div')
+      container.className = 'no-track'
+      const input = document.createElement('input')
+      container.appendChild(input)
+      document.body.appendChild(container)
+
+      const result = find({ target: input, ignoreSelectors: ['.no-track'], eventType: 'input' })
+      expect(result).toBeNull()
+      container.remove()
+    })
+
     it('excludes disabled elements', () => {
       const el = document.createElement('input')
       el.setAttribute('disabled', '')
@@ -254,6 +289,18 @@ describe('findTrackableElement', () => {
       const result = find({ target: el, ignoreSelectors: ['.no-track'], eventType: 'keydown' })
       expect(result).toBeNull()
       el.remove()
+    })
+
+    it('excludes elements inside an ignored container', () => {
+      const container = document.createElement('div')
+      container.className = 'no-track'
+      const child = document.createElement('div')
+      container.appendChild(child)
+      document.body.appendChild(container)
+
+      const result = find({ target: child, ignoreSelectors: ['.no-track'], eventType: 'scroll' })
+      expect(result).toBeNull()
+      container.remove()
     })
 
     it('does NOT exclude disabled elements', () => {

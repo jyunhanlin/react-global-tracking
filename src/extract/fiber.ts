@@ -27,7 +27,6 @@ function getFiberFromElement(element: Element): object | null {
   if (cachedKey !== null) {
     const fiber = (element as any)[cachedKey]
     if (fiber != null) return fiber as object
-    return null
   }
 
   for (const key of Object.keys(element)) {

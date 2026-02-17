@@ -42,6 +42,19 @@ describe('resolveFiber', () => {
     expect(resolveFiber(el2)).toBe(fiber2)
   })
 
+  it('falls through to search when cached key does not match (multi-React-version)', () => {
+    const el1 = document.createElement('div')
+    const fiber1 = { type: 'div', memoizedProps: {} }
+    ;(el1 as any)['__reactFiber$abc'] = fiber1
+
+    const el2 = document.createElement('span')
+    const fiber2 = { type: 'span', memoizedProps: {} }
+    ;(el2 as any)['__reactFiber$xyz'] = fiber2
+
+    resolveFiber(el1) // caches __reactFiber$abc
+    expect(resolveFiber(el2)).toBe(fiber2) // should still find via __reactFiber$xyz
+  })
+
   it('walks up parent elements when target has no fiber', () => {
     const parent = document.createElement('div')
     const child = document.createElement('span')

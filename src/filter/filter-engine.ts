@@ -1,7 +1,7 @@
 import type { FiberInfo } from '../types'
 import { getEventCategory, getHandlersForEvent, EventCategory } from './event-categories'
 import { resolveFiber, extractFiberInfo } from '../extract/fiber'
-import { safeMatches } from '../utils/safe-matches'
+import { safeClosest } from '../utils/safe-selector'
 
 const INTERACTIVE_TAGS = new Set([
   'BUTTON',
@@ -69,11 +69,12 @@ function findPointerTarget(
   ignoreSelectors: readonly string[],
   eventType: string,
 ): FilterResult | null {
+  if (isIgnored(target, ignoreSelectors)) return null
+
   let current: Element | null = target
   let depth = 0
 
   while (current !== null && depth <= MAX_ANCESTOR_DEPTH) {
-    if (isIgnored(current, ignoreSelectors)) return null
     if (isDisabled(current)) return null
 
     const rawFiber = findInteractiveFiber(current, eventType)
@@ -120,7 +121,7 @@ function findInteractiveFiber(el: Element, eventType: string): object | null | u
     const fiber = resolveFiber(el)
     if (fiber !== null) {
       const props = (fiber as any).memoizedProps
-      if (props !== null && props !== undefined) {
+      if (props != null) {
         for (const handler of handlers) {
           if (typeof props[handler] === 'function') return fiber
         }
@@ -132,7 +133,7 @@ function findInteractiveFiber(el: Element, eventType: string): object | null | u
 }
 
 export function isIgnored(element: Element, ignoreSelectors: readonly string[]): boolean {
-  return ignoreSelectors.some((selector) => safeMatches(element, selector))
+  return ignoreSelectors.some((selector) => safeClosest(element, selector))
 }
 
 export function isDisabled(el: Element): boolean {
