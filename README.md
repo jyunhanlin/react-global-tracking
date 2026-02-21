@@ -65,6 +65,15 @@ tracker.on('click', handler, { once: true })
 tracker.on('click', handler, { selector: 'nav a' })
 ```
 
+**Options:**
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `debounce` | `number` | Debounce the callback by the given milliseconds |
+| `throttle` | `number` | Throttle the callback by the given milliseconds |
+| `once` | `boolean` | Automatically unsubscribe after the first invocation |
+| `selector` | `string` | Only fire the callback when the target matches the CSS selector (global `ignoreSelectors` is still applied first) |
+
 Multiple listeners can be registered for the same event type — each fires independently, similar to `addEventListener`.
 
 ### `tracker.getLastEvent(): TrackEvent | null`
