@@ -117,23 +117,6 @@ interface FiberInfo {
 
 The library intentionally keeps `TrackEvent` minimal — use `nativeEvent` and `targetElement` to extract any DOM information you need, and `fiber.props` to access rich, typed data from React components (avoiding the `[object Object]` problem of HTML `data-*` attributes).
 
-## Event Categories
-
-| Category | Events | Behavior |
-|----------|--------|----------|
-| **Pointer** | `click`, `touchstart`, `touchend` | Walks DOM ancestors to find interactive element (button, link, ARIA role, React handler) |
-| **Form** | `input`, `change`, `focus`, `blur`, `submit` | Tracks target directly, skips disabled elements |
-| **Ambient** | `scroll`, `keydown`, `keyup`, `copy`, `paste`, `resize`, `popstate`, `hashchange` | Tracks target directly, does not skip disabled |
-
-## How It Works
-
-1. **DOM delegation** — attaches a single capture-phase listener per event type on `document`
-2. **Filtering** — determines if the target (or ancestor) is interactive based on HTML semantics, ARIA roles, or React fiber props
-3. **Fiber resolution** — finds the nearest React component and extracts its name and props
-4. **Dispatch** — invokes all registered callbacks with the `TrackEvent`
-
-Capture phase (`addEventListener(..., true)`) ensures events are caught even if `stopPropagation()` is called downstream.
-
 ## Development
 
 ```bash
