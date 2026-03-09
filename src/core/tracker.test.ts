@@ -191,6 +191,46 @@ describe('createTracker', () => {
     tracker.destroy()
   })
 
+  it('applies global debounce config', () => {
+    vi.useFakeTimers()
+    const tracker = createTracker({ debounce: 200 })
+    const cb = vi.fn()
+
+    tracker.on('click', cb)
+
+    const button = document.createElement('button')
+    document.body.appendChild(button)
+
+    button.click()
+    expect(cb).not.toHaveBeenCalled()
+
+    vi.advanceTimersByTime(200)
+    expect(cb).toHaveBeenCalledOnce()
+
+    button.remove()
+    tracker.destroy()
+    vi.useRealTimers()
+  })
+
+  it('listener scheduling overrides global scheduling', () => {
+    vi.useFakeTimers()
+    const tracker = createTracker({ debounce: 200 })
+    const cb = vi.fn()
+
+    tracker.on('click', cb, { throttle: 100 })
+
+    const button = document.createElement('button')
+    document.body.appendChild(button)
+
+    button.click()
+    // throttle executes immediately on first call
+    expect(cb).toHaveBeenCalledOnce()
+
+    button.remove()
+    tracker.destroy()
+    vi.useRealTimers()
+  })
+
   it('logs events when debug is true', () => {
     const consoleSpy = vi.spyOn(console, 'debug').mockImplementation(() => {})
     const tracker = createTracker({ debug: true })

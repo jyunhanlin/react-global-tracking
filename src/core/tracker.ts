@@ -14,7 +14,12 @@ export function createTracker(config?: TrackerConfig): Tracker {
     }
   }
 
-  const pipeline = createPipeline({ ignoreSelectors })
+  const pipeline = createPipeline({
+    ignoreSelectors,
+    debounce: config?.debounce,
+    throttle: config?.throttle,
+    idle: config?.idle,
+  })
   const domListeners = new Map<string, (event: Event) => void>()
   let destroyed = false
 

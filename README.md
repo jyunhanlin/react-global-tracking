@@ -8,7 +8,8 @@ Global user interaction tracking for React apps (16–19). Captures clicks, form
 - **Fiber introspection** — automatically resolves the nearest React component name and props
 - **Smart filtering** — only tracks interactive elements (buttons, links, ARIA roles, elements with React handlers)
 - **Three event categories** — Pointer (click), Form (input/change/focus/blur), Ambient (scroll/keydown/keyup)
-- **Listener options** — debounce, throttle, once, CSS selector filtering
+- **Listener options** — debounce, throttle, idle (requestIdleCallback), once, CSS selector filtering
+- **Global scheduling** — set default debounce, throttle, or idle at tracker level; per-listener overrides
 - **Tree-shakeable** — ESM + CJS, zero runtime dependencies
 
 ## Install
@@ -44,11 +45,25 @@ Creates a tracker instance.
 
 ```ts
 const tracker = init({
-  enabled: true,           // toggle tracking on/off
+  enabled: true,
   ignoreSelectors: ['.no-track', '[data-private]'],
-  debug: false,            // log events to console.debug
+  debug: false,
+  debounce: 300,               // global default: debounce all callbacks by 300ms
+  // throttle: 200,            // or throttle (mutually exclusive with debounce/idle)
+  // idle: 2000,               // or idle via requestIdleCallback (mutually exclusive)
 })
 ```
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `enabled` | `boolean` | Toggle tracking on/off (default: `true`) |
+| `ignoreSelectors` | `string[]` | CSS selectors to exclude from tracking |
+| `debug` | `boolean` | Log events to `console.debug` (default: `false`) |
+| `debounce` | `number` | Global default: debounce all callbacks (ms) |
+| `throttle` | `number` | Global default: throttle all callbacks (ms) |
+| `idle` | `number` | Global default: defer all callbacks via `requestIdleCallback` with timeout (ms) |
+
+`debounce`, `throttle`, and `idle` are mutually exclusive — priority: `debounce` > `throttle` > `idle`.
 
 ### `tracker.on(eventType, callback, options?): unsubscribe`
 
@@ -71,10 +86,31 @@ tracker.on('click', handler, { selector: 'nav a' })
 |--------|------|-------------|
 | `debounce` | `number` | Debounce the callback by the given milliseconds |
 | `throttle` | `number` | Throttle the callback by the given milliseconds |
+| `idle` | `number` | Defer callback via `requestIdleCallback` with the given timeout in milliseconds. Falls back to `setTimeout` in unsupported environments |
 | `once` | `boolean` | Automatically unsubscribe after the first invocation |
 | `selector` | `string` | Only fire the callback when the target matches the CSS selector (global `ignoreSelectors` is still applied first) |
 
+`debounce`, `throttle`, and `idle` are mutually exclusive (priority: `debounce` > `throttle` > `idle`). When a listener sets any of these, it overrides the global scheduling config entirely. Use `{ debounce: 0 }`, `{ throttle: 0 }`, or `{ idle: 0 }` to explicitly opt out of a global default.
+
 Multiple listeners can be registered for the same event type — each fires independently, similar to `addEventListener`.
+
+### Global Scheduling
+
+Set a default scheduling strategy at the tracker level. Per-listener options override the global config as a group — setting any scheduling option on a listener ignores all global scheduling.
+
+```ts
+const tracker = init({ idle: 2000 })
+
+// All listeners inherit idle: 2000
+tracker.on('click', cb)                          // idle 2000ms
+tracker.on('scroll', cb)                         // idle 2000ms
+
+// Per-listener override (group override — global idle ignored)
+tracker.on('input', cb, { debounce: 300 })       // debounce 300ms
+
+// Explicit opt-out
+tracker.on('click', importantCb, { idle: 0 })    // sync execution
+```
 
 ### `tracker.getLastEvent(): TrackEvent | null`
 

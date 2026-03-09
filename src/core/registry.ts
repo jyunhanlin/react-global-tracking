@@ -1,7 +1,14 @@
 import type { TrackEvent, TrackCallback, ListenerOptions } from '../types'
 import { debounce } from '../utils/debounce'
 import { throttle } from '../utils/throttle'
+import { idle } from '../utils/idle'
 import { safeMatches } from '../utils/safe-selector'
+
+export interface SchedulingConfig {
+  readonly debounce?: number
+  readonly throttle?: number
+  readonly idle?: number
+}
 
 interface RegistryEntry {
   readonly eventType: string
@@ -17,7 +24,7 @@ export interface Registry {
   clear(): void
 }
 
-export function createRegistry(): Registry {
+export function createRegistry(globalScheduling?: SchedulingConfig): Registry {
   let entries: RegistryEntry[] = []
 
   function createEntry(
@@ -25,7 +32,10 @@ export function createRegistry(): Registry {
     callback: TrackCallback,
     options: ListenerOptions,
   ): RegistryEntry {
-    const wrappedCallback = wrapCallback(callback, options)
+    let unsubscribeFn: (() => void) | null = null
+    const wrappedCallback = wrapCallback(callback, options, globalScheduling, () =>
+      unsubscribeFn?.(),
+    )
     const entry: RegistryEntry = {
       eventType,
       wrappedCallback,
@@ -35,6 +45,7 @@ export function createRegistry(): Registry {
         entries = entries.filter((e) => e !== entry)
       },
     }
+    unsubscribeFn = entry.unsubscribe
     return entry
   }
 
@@ -56,11 +67,6 @@ export function createRegistry(): Registry {
         }
 
         entry.wrappedCallback(event)
-
-        // once: auto-unsubscribe after first fire
-        if (entry.options.once === true) {
-          entry.unsubscribe()
-        }
       }
     },
 
@@ -80,12 +86,35 @@ export function createRegistry(): Registry {
 function wrapCallback(
   callback: TrackCallback,
   options: ListenerOptions,
+  globalScheduling?: SchedulingConfig,
+  onceUnsubscribe?: () => void,
 ): TrackCallback & { cancel?: () => void } {
-  if (options.debounce != null) {
-    return debounce(callback, options.debounce)
+  // once wraps innermost — fires when the actual callback executes, not when scheduled
+  let cb = callback
+  if (options.once === true && onceUnsubscribe != null) {
+    let called = false
+    cb = (event: TrackEvent) => {
+      if (called) return
+      called = true
+      callback(event)
+      onceUnsubscribe()
+    }
   }
-  if (options.throttle != null) {
-    return throttle(callback, options.throttle)
+
+  const scheduling =
+    options.debounce != null || options.throttle != null || options.idle != null
+      ? options
+      : { ...globalScheduling }
+
+  // Priority: debounce > throttle > idle
+  if (scheduling.debounce != null && scheduling.debounce > 0) {
+    return debounce(cb, scheduling.debounce)
   }
-  return callback
+  if (scheduling.throttle != null && scheduling.throttle > 0) {
+    return throttle(cb, scheduling.throttle)
+  }
+  if (scheduling.idle != null && scheduling.idle > 0) {
+    return idle(cb, scheduling.idle)
+  }
+  return cb
 }
