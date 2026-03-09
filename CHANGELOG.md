@@ -1,5 +1,11 @@
 # react-global-tracking
 
+## 0.2.0
+
+### Minor Changes
+
+- Add `idle` scheduling option via `requestIdleCallback` (with `setTimeout` fallback) and promote `debounce`/`throttle`/`idle` to global `TrackerConfig` with group-override semantics. Fix `once` option not working correctly with scheduled callbacks.
+
 ## 0.1.3
 
 ### Patch Changes
