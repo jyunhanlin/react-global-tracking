@@ -83,19 +83,15 @@ export function createRegistry(globalScheduling?: SchedulingConfig): Registry {
   }
 }
 
-function hasListenerScheduling(options: ListenerOptions): boolean {
-  return options.debounce != null || options.throttle != null || options.idle != null
-}
-
 function wrapCallback(
   callback: TrackCallback,
   options: ListenerOptions,
   globalScheduling?: SchedulingConfig,
 ): TrackCallback & { cancel?: () => void } {
-  // Group override: if listener sets any scheduling option, use listener's; otherwise use global
-  const scheduling = hasListenerScheduling(options)
-    ? options
-    : { ...globalScheduling }
+  const scheduling =
+    options.debounce != null || options.throttle != null || options.idle != null
+      ? options
+      : { ...globalScheduling }
 
   // Priority: debounce > throttle > idle
   if (scheduling.debounce != null && scheduling.debounce > 0) {
