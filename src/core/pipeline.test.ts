@@ -124,6 +124,30 @@ describe('createPipeline', () => {
     button.remove()
   })
 
+  it('applies global debounce config to listeners', () => {
+    const config = makeConfig({ debounce: 200 })
+    const pipeline = createPipeline(config)
+    const callback = vi.fn()
+
+    vi.useFakeTimers()
+
+    pipeline.addListener('click', callback, {})
+
+    const button = document.createElement('button')
+    document.body.appendChild(button)
+
+    const event = new MouseEvent('click', { bubbles: true })
+    Object.defineProperty(event, 'target', { value: button })
+    pipeline.handleEvent(event)
+
+    expect(callback).not.toHaveBeenCalled()
+    vi.advanceTimersByTime(200)
+    expect(callback).toHaveBeenCalledOnce()
+
+    button.remove()
+    vi.useRealTimers()
+  })
+
   it('updates lastEvent after successful tracking', () => {
     const config = makeConfig()
     const pipeline = createPipeline(config)

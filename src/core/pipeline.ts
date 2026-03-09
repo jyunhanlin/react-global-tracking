@@ -1,6 +1,6 @@
 import type { TrackEvent, TrackCallback, ListenerOptions } from '../types'
 import { findTrackableElement } from '../filter/filter-engine'
-import { createRegistry } from './registry'
+import { createRegistry, type SchedulingConfig } from './registry'
 
 export interface Pipeline {
   handleEvent(domEvent: Event): void
@@ -12,10 +12,18 @@ export interface Pipeline {
 
 export interface PipelineConfig {
   readonly ignoreSelectors: readonly string[]
+  readonly debounce?: number
+  readonly throttle?: number
+  readonly idle?: number
 }
 
 export function createPipeline(config: PipelineConfig): Pipeline {
-  const registry = createRegistry()
+  const globalScheduling: SchedulingConfig = {
+    debounce: config.debounce,
+    throttle: config.throttle,
+    idle: config.idle,
+  }
+  const registry = createRegistry(globalScheduling)
   let lastEvent: TrackEvent | null = null
 
   return {
