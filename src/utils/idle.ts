@@ -24,10 +24,13 @@ export function idle<T extends (...args: any[]) => void>(fn: T, timeout: number)
   let pendingIds: ReturnType<typeof scheduleIdle>[] = []
 
   const idled = (...args: Parameters<T>): void => {
-    const id = scheduleIdle(() => {
-      pendingIds = pendingIds.filter((pid) => pid !== id)
-      fn(...args)
-    }, { timeout })
+    const id = scheduleIdle(
+      () => {
+        pendingIds = pendingIds.filter((pid) => pid !== id)
+        fn(...args)
+      },
+      { timeout },
+    )
     pendingIds = [...pendingIds, id]
   }
 
