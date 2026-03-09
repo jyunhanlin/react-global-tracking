@@ -151,4 +151,80 @@ describe('createRegistry', () => {
 
     expect(cb).not.toHaveBeenCalled()
   })
+
+  it('applies idle option — defers callback', () => {
+    const registry = createRegistry()
+    const cb = vi.fn()
+
+    registry.add('click', cb, { idle: 1000 })
+    registry.invoke(fakeEvent())
+
+    expect(cb).not.toHaveBeenCalled()
+    vi.advanceTimersByTime(1000)
+    expect(cb).toHaveBeenCalledOnce()
+  })
+
+  it('idle cancel works on unsubscribe', () => {
+    const registry = createRegistry()
+    const cb = vi.fn()
+
+    const unsub = registry.add('click', cb, { idle: 1000 })
+    registry.invoke(fakeEvent())
+    unsub()
+
+    vi.advanceTimersByTime(2000)
+    expect(cb).not.toHaveBeenCalled()
+  })
+
+  it('applies global scheduling when listener has no scheduling options', () => {
+    const registry = createRegistry({ debounce: 200 })
+    const cb = vi.fn()
+
+    registry.add('click', cb, {})
+    registry.invoke(fakeEvent())
+    registry.invoke(fakeEvent())
+
+    expect(cb).not.toHaveBeenCalled()
+    vi.advanceTimersByTime(200)
+    expect(cb).toHaveBeenCalledOnce()
+  })
+
+  it('listener scheduling overrides global (group override)', () => {
+    const registry = createRegistry({ debounce: 200 })
+    const cb = vi.fn()
+
+    registry.add('click', cb, { idle: 1000 })
+    registry.invoke(fakeEvent())
+
+    // Should NOT use global debounce — listener set idle, so group override applies
+    vi.advanceTimersByTime(200)
+    expect(cb).not.toHaveBeenCalled()
+
+    vi.advanceTimersByTime(800)
+    expect(cb).toHaveBeenCalledOnce()
+  })
+
+  it('listener scheduling with 0 opts out of global', () => {
+    const registry = createRegistry({ debounce: 200 })
+    const cb = vi.fn()
+
+    registry.add('click', cb, { debounce: 0 })
+    registry.invoke(fakeEvent())
+
+    // debounce: 0 = sync execution, even though global has debounce: 200
+    expect(cb).toHaveBeenCalledOnce()
+  })
+
+  it('global priority: debounce > throttle > idle', () => {
+    const registry = createRegistry({ debounce: 200, throttle: 100, idle: 1000 })
+    const cb = vi.fn()
+
+    registry.add('click', cb, {})
+    registry.invoke(fakeEvent())
+
+    // debounce wins
+    expect(cb).not.toHaveBeenCalled()
+    vi.advanceTimersByTime(200)
+    expect(cb).toHaveBeenCalledOnce()
+  })
 })

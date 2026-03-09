@@ -1,7 +1,14 @@
 import type { TrackEvent, TrackCallback, ListenerOptions } from '../types'
 import { debounce } from '../utils/debounce'
 import { throttle } from '../utils/throttle'
+import { idle } from '../utils/idle'
 import { safeMatches } from '../utils/safe-selector'
+
+export interface SchedulingConfig {
+  readonly debounce?: number
+  readonly throttle?: number
+  readonly idle?: number
+}
 
 interface RegistryEntry {
   readonly eventType: string
@@ -17,7 +24,7 @@ export interface Registry {
   clear(): void
 }
 
-export function createRegistry(): Registry {
+export function createRegistry(globalScheduling?: SchedulingConfig): Registry {
   let entries: RegistryEntry[] = []
 
   function createEntry(
@@ -25,7 +32,7 @@ export function createRegistry(): Registry {
     callback: TrackCallback,
     options: ListenerOptions,
   ): RegistryEntry {
-    const wrappedCallback = wrapCallback(callback, options)
+    const wrappedCallback = wrapCallback(callback, options, globalScheduling)
     const entry: RegistryEntry = {
       eventType,
       wrappedCallback,
@@ -57,7 +64,6 @@ export function createRegistry(): Registry {
 
         entry.wrappedCallback(event)
 
-        // once: auto-unsubscribe after first fire
         if (entry.options.once === true) {
           entry.unsubscribe()
         }
@@ -77,15 +83,29 @@ export function createRegistry(): Registry {
   }
 }
 
+function hasListenerScheduling(options: ListenerOptions): boolean {
+  return options.debounce != null || options.throttle != null || options.idle != null
+}
+
 function wrapCallback(
   callback: TrackCallback,
   options: ListenerOptions,
+  globalScheduling?: SchedulingConfig,
 ): TrackCallback & { cancel?: () => void } {
-  if (options.debounce != null) {
-    return debounce(callback, options.debounce)
+  // Group override: if listener sets any scheduling option, use listener's; otherwise use global
+  const scheduling = hasListenerScheduling(options)
+    ? options
+    : { ...globalScheduling }
+
+  // Priority: debounce > throttle > idle
+  if (scheduling.debounce != null && scheduling.debounce > 0) {
+    return debounce(callback, scheduling.debounce)
   }
-  if (options.throttle != null) {
-    return throttle(callback, options.throttle)
+  if (scheduling.throttle != null && scheduling.throttle > 0) {
+    return throttle(callback, scheduling.throttle)
+  }
+  if (scheduling.idle != null && scheduling.idle > 0) {
+    return idle(callback, scheduling.idle)
   }
   return callback
 }
