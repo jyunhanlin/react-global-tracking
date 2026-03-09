@@ -4,6 +4,9 @@ export interface TrackerConfig {
   readonly enabled?: boolean
   readonly ignoreSelectors?: readonly string[]
   readonly debug?: boolean
+  readonly debounce?: number
+  readonly throttle?: number
+  readonly idle?: number
 }
 
 export interface Tracker {
@@ -15,6 +18,7 @@ export interface Tracker {
 export interface ListenerOptions {
   readonly debounce?: number
   readonly throttle?: number
+  readonly idle?: number
   readonly once?: boolean
   readonly selector?: string
 }
