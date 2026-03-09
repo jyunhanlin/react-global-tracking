@@ -108,6 +108,37 @@ describe('createRegistry', () => {
     expect(cb).toHaveBeenCalledOnce()
   })
 
+  it('once + idle — callback fires once after idle, then unsubscribes', () => {
+    const registry = createRegistry()
+    const cb = vi.fn()
+
+    registry.add('click', cb, { once: true, idle: 1000 })
+    registry.invoke(fakeEvent('click'))
+    registry.invoke(fakeEvent('click'))
+
+    expect(cb).not.toHaveBeenCalled()
+    vi.advanceTimersByTime(1000)
+    expect(cb).toHaveBeenCalledOnce()
+  })
+
+  it('once + debounce — callback fires once after debounce, then unsubscribes', () => {
+    const registry = createRegistry()
+    const cb = vi.fn()
+
+    registry.add('click', cb, { once: true, debounce: 200 })
+    registry.invoke(fakeEvent('click'))
+    registry.invoke(fakeEvent('click'))
+
+    expect(cb).not.toHaveBeenCalled()
+    vi.advanceTimersByTime(200)
+    expect(cb).toHaveBeenCalledOnce()
+
+    // Further invocations after unsubscribe should not fire
+    registry.invoke(fakeEvent('click'))
+    vi.advanceTimersByTime(200)
+    expect(cb).toHaveBeenCalledOnce()
+  })
+
   it('applies selector option — only fires when targetElement matches', () => {
     const registry = createRegistry()
     const cb = vi.fn()
