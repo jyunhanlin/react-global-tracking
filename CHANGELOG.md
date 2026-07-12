@@ -1,5 +1,11 @@
 # react-global-tracking
 
+## 0.2.1
+
+### Patch Changes
+
+- Update dev toolchain to latest (typescript 7, tsdown 0.22, vitest 4.1, oxlint 1.73, oxfmt 0.58, jsdom 29) and CI action versions. No runtime changes.
+
 ## 0.2.0
 
 ### Minor Changes
