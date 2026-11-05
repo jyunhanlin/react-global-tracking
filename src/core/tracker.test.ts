@@ -191,6 +191,27 @@ describe('createTracker', () => {
     tracker.destroy()
   })
 
+  it('unsubscribing one event type keeps tracking other types (shared handler)', () => {
+    const tracker = createTracker()
+    const onClick = vi.fn()
+    const onFocus = vi.fn()
+
+    const unsubClick = tracker.on('click', onClick)
+    tracker.on('focus', onFocus)
+    unsubClick()
+
+    const button = document.createElement('button')
+    document.body.appendChild(button)
+    button.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    button.dispatchEvent(new FocusEvent('focus'))
+
+    expect(onClick).not.toHaveBeenCalled()
+    expect(onFocus).toHaveBeenCalledOnce()
+
+    button.remove()
+    tracker.destroy()
+  })
+
   it('applies global debounce config', () => {
     vi.useFakeTimers()
     const tracker = createTracker({ debounce: 200 })

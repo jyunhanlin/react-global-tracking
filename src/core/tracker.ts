@@ -16,34 +16,34 @@ export function createTracker(config?: TrackerConfig): Tracker {
 
   // config also carries the global SchedulingOptions (debounce/throttle/idle)
   const pipeline = createPipeline({ ...config, ignoreSelectors })
-  const domListeners = new Map<string, (event: Event) => void>()
+  const attachedTypes = new Set<string>()
   let destroyed = false
+
+  // One handler serves every event type: the pipeline reads event.type itself.
+  const handler = (event: Event): void => {
+    const trackEvent = pipeline.handleEvent(event)
+    if (debug && trackEvent !== null) {
+      console.debug('[react-global-tracking]', trackEvent)
+    }
+  }
 
   // Lazily attaches one capture-phase listener per event type on document.
   // Multiple on() calls for the same type share a single DOM listener;
   // the pipeline fans out to all registered callbacks internally.
   function ensureDomListener(eventType: string): void {
-    if (domListeners.has(eventType)) return
-
-    const handler = (event: Event): void => {
-      const trackEvent = pipeline.handleEvent(event)
-      if (debug && trackEvent !== null) {
-        console.debug('[react-global-tracking]', trackEvent)
-      }
-    }
+    if (attachedTypes.has(eventType)) return
 
     document.addEventListener(eventType, handler, true)
-    domListeners.set(eventType, handler)
+    attachedTypes.add(eventType)
   }
 
   function removeDomListener(eventType: string): void {
-    const handler = domListeners.get(eventType)
-    if (handler === undefined) return
+    if (!attachedTypes.has(eventType)) return
 
     // Only remove if no more listeners for this type
     if (!pipeline.getEventTypes().has(eventType)) {
       document.removeEventListener(eventType, handler, true)
-      domListeners.delete(eventType)
+      attachedTypes.delete(eventType)
     }
   }
 
@@ -70,10 +70,10 @@ export function createTracker(config?: TrackerConfig): Tracker {
 
       pipeline.clear()
 
-      for (const [eventType, handler] of domListeners) {
+      for (const eventType of attachedTypes) {
         document.removeEventListener(eventType, handler, true)
       }
-      domListeners.clear()
+      attachedTypes.clear()
     },
   }
 }
