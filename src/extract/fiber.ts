@@ -7,12 +7,16 @@ const MAX_PARENT_DEPTH = 10
 
 let cachedKey: string | null = null
 
-export function resolveFiber(element: Element): object | null {
+/**
+ * Returns the fiber of `element` or of its nearest ancestor that has one.
+ * Use for context lookup (which component rendered this area).
+ */
+export function resolveNearestFiber(element: Element): object | null {
   let current: Element | null = element
   let depth = 0
 
   while (current !== null && depth <= MAX_PARENT_DEPTH) {
-    const fiber = getFiberFromElement(current)
+    const fiber = getOwnFiber(current)
     if (fiber !== null) {
       return fiber
     }
@@ -23,7 +27,11 @@ export function resolveFiber(element: Element): object | null {
   return null
 }
 
-function getFiberFromElement(element: Element): object | null {
+/**
+ * Returns the fiber attached to `element` itself, or null. Never walks up.
+ * Use when the answer must describe this exact element (e.g. "does it have onClick?").
+ */
+export function getOwnFiber(element: Element): object | null {
   if (cachedKey !== null) {
     const fiber = (element as any)[cachedKey]
     if (fiber != null) return fiber as object

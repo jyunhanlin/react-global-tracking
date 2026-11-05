@@ -1,16 +1,16 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { resolveFiber, resetFiberKeyCache, extractFiberInfo } from './fiber'
+import { getOwnFiber, resolveNearestFiber, resetFiberKeyCache, extractFiberInfo } from './fiber'
 
-// === resolveFiber ===
+// === resolveNearestFiber ===
 
-describe('resolveFiber', () => {
+describe('resolveNearestFiber', () => {
   beforeEach(() => {
     resetFiberKeyCache()
   })
 
   it('returns null for element without fiber', () => {
     const el = document.createElement('div')
-    expect(resolveFiber(el)).toBeNull()
+    expect(resolveNearestFiber(el)).toBeNull()
   })
 
   it('finds fiber with __reactFiber$ prefix (React 18+)', () => {
@@ -18,7 +18,7 @@ describe('resolveFiber', () => {
     const fakeFiber = { type: 'div', memoizedProps: {} }
     ;(el as any)['__reactFiber$abc123'] = fakeFiber
 
-    expect(resolveFiber(el)).toBe(fakeFiber)
+    expect(resolveNearestFiber(el)).toBe(fakeFiber)
   })
 
   it('finds fiber with __reactInternalInstance$ prefix (React 16-17)', () => {
@@ -26,7 +26,7 @@ describe('resolveFiber', () => {
     const fakeFiber = { type: 'div', memoizedProps: {} }
     ;(el as any)['__reactInternalInstance$xyz789'] = fakeFiber
 
-    expect(resolveFiber(el)).toBe(fakeFiber)
+    expect(resolveNearestFiber(el)).toBe(fakeFiber)
   })
 
   it('caches the discovered key prefix', () => {
@@ -38,8 +38,8 @@ describe('resolveFiber', () => {
     const fiber2 = { type: 'span', memoizedProps: {} }
     ;(el2 as any)['__reactFiber$abc'] = fiber2
 
-    resolveFiber(el1)
-    expect(resolveFiber(el2)).toBe(fiber2)
+    resolveNearestFiber(el1)
+    expect(resolveNearestFiber(el2)).toBe(fiber2)
   })
 
   it('falls through to search when cached key does not match (multi-React-version)', () => {
@@ -51,8 +51,8 @@ describe('resolveFiber', () => {
     const fiber2 = { type: 'span', memoizedProps: {} }
     ;(el2 as any)['__reactFiber$xyz'] = fiber2
 
-    resolveFiber(el1) // caches __reactFiber$abc
-    expect(resolveFiber(el2)).toBe(fiber2) // should still find via __reactFiber$xyz
+    resolveNearestFiber(el1) // caches __reactFiber$abc
+    expect(resolveNearestFiber(el2)).toBe(fiber2) // should still find via __reactFiber$xyz
   })
 
   it('walks up parent elements when target has no fiber', () => {
@@ -63,7 +63,7 @@ describe('resolveFiber', () => {
     const fakeFiber = { type: 'div', memoizedProps: {} }
     ;(parent as any)['__reactFiber$abc'] = fakeFiber
 
-    expect(resolveFiber(child)).toBe(fakeFiber)
+    expect(resolveNearestFiber(child)).toBe(fakeFiber)
   })
 
   it('stops walking after max depth (10 levels)', () => {
@@ -79,7 +79,32 @@ describe('resolveFiber', () => {
     ;(root as any)['__reactFiber$abc'] = fakeFiber
 
     // child is 15 levels deep, should not find fiber (max 10)
-    expect(resolveFiber(current)).toBeNull()
+    expect(resolveNearestFiber(current)).toBeNull()
+  })
+})
+
+// === getOwnFiber ===
+
+describe('getOwnFiber', () => {
+  beforeEach(() => {
+    resetFiberKeyCache()
+  })
+
+  it('returns the fiber attached to the element itself', () => {
+    const el = document.createElement('div')
+    const fakeFiber = { type: 'div', memoizedProps: {} }
+    ;(el as any)['__reactFiber$abc'] = fakeFiber
+
+    expect(getOwnFiber(el)).toBe(fakeFiber)
+  })
+
+  it('does not walk up to the parent fiber', () => {
+    const parent = document.createElement('div')
+    const child = document.createElement('span')
+    parent.appendChild(child)
+    ;(parent as any)['__reactFiber$abc'] = { type: 'div', memoizedProps: {} }
+
+    expect(getOwnFiber(child)).toBeNull()
   })
 })
 

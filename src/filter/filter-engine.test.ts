@@ -147,6 +147,24 @@ describe('findTrackableElement', () => {
       el.remove()
     })
 
+    it('reports the handler owner when the target has no fiber of its own', () => {
+      // e.g. markup injected via dangerouslySetInnerHTML inside a div with onClick
+      const owner = document.createElement('div')
+      const injected = document.createElement('span')
+      owner.appendChild(injected)
+      document.body.appendChild(owner)
+      ;(owner as any)['__reactFiber$test'] = {
+        type: 'div',
+        memoizedProps: { onClick: () => {} },
+        return: { type: function Card() {}, memoizedProps: {}, return: null },
+      }
+
+      const result = find({ target: injected, eventType: 'click' })
+      expect(result?.element).toBe(owner)
+      expect(result?.fiber?.componentName).toBe('Card')
+      owner.remove()
+    })
+
     it('walks up to find interactive ancestor', () => {
       const button = document.createElement('button')
       const span = document.createElement('span')

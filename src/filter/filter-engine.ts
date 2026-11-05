@@ -1,6 +1,6 @@
 import type { FiberInfo } from '../types'
 import { getEventCategory, getHandlersForEvent, EventCategory } from './event-categories'
-import { resolveFiber, extractFiberInfo } from '../extract/fiber'
+import { getOwnFiber, resolveNearestFiber, extractFiberInfo } from '../extract/fiber'
 import { safeClosest } from '../utils/safe-selector'
 
 const INTERACTIVE_TAGS = new Set([
@@ -92,7 +92,7 @@ function findPointerTarget(
 function findFormTarget(target: Element, ignoreSelectors: readonly string[]): FilterResult | null {
   if (isIgnored(target, ignoreSelectors)) return null
   if (isDisabled(target)) return null
-  return { element: target, fiber: extractFiberInfo(resolveFiber(target)) }
+  return { element: target, fiber: extractFiberInfo(resolveNearestFiber(target)) }
 }
 
 function findAmbientTarget(
@@ -100,7 +100,7 @@ function findAmbientTarget(
   ignoreSelectors: readonly string[],
 ): FilterResult | null {
   if (isIgnored(target, ignoreSelectors)) return null
-  return { element: target, fiber: extractFiberInfo(resolveFiber(target)) }
+  return { element: target, fiber: extractFiberInfo(resolveNearestFiber(target)) }
 }
 
 /**
@@ -109,16 +109,18 @@ function findAmbientTarget(
  */
 function findInteractiveFiber(el: Element, eventType: string): object | null | undefined {
   // 1. Semantic tag
-  if (INTERACTIVE_TAGS.has(el.tagName)) return resolveFiber(el)
+  if (INTERACTIVE_TAGS.has(el.tagName)) return resolveNearestFiber(el)
 
   // 2. ARIA role
   const role = el.getAttribute('role')
-  if (role !== null && INTERACTIVE_ROLES.has(role)) return resolveFiber(el)
+  if (role !== null && INTERACTIVE_ROLES.has(role)) return resolveNearestFiber(el)
 
-  // 3. React event handler via fiber
+  // 3. React event handler via fiber.
+  // Must use el's own fiber: the caller already walks ancestors, and a nearest-fiber
+  // lookup would attribute an ancestor's handler to a non-React child element.
   const handlers = getHandlersForEvent(eventType)
   if (handlers.length > 0) {
-    const fiber = resolveFiber(el)
+    const fiber = getOwnFiber(el)
     if (fiber !== null) {
       const props = (fiber as any).memoizedProps
       if (props != null) {
