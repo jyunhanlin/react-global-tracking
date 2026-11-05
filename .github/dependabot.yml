@@ -1,0 +1,37 @@
+version: 2
+
+updates:
+  # npm packages: the library (/) and the demo app (/playground).
+  # Each directory gets one grouped PR per week.
+  - package-ecosystem: npm
+    directories:
+      - "/"
+      - "/playground"
+    schedule:
+      interval: weekly
+    # pnpm 12 refuses versions younger than minimumReleaseAge (1 day by default),
+    # so CI's `pnpm install --frozen-lockfile` would fail on a fresher bump.
+    # Keep the cooldown at 1 day or more.
+    cooldown:
+      default-days: 3
+    groups:
+      npm-dependencies:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: chore
+      include: scope
+
+  # GitHub Actions used in .github/workflows
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 3
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: ci
