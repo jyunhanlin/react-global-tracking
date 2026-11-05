@@ -5,9 +5,9 @@ Global user interaction tracking for React apps (16–19). Captures clicks, form
 ## Features
 
 - **Zero-config** — works with any React 16–19 app, no provider or HOC needed
-- **Fiber introspection** — automatically resolves the nearest React component name and props
+- **Fiber introspection** — reports the nearest React component name and the tracked element's React props (original types, not stringified)
 - **Smart filtering** — only tracks interactive elements (buttons, links, ARIA roles, elements with React handlers)
-- **Three event categories** — Pointer (click), Form (input/change/focus/blur), Ambient (scroll/keydown/keyup)
+- **Three event categories** — Pointer, Form, and Ambient (see [Event categories](#event-categories))
 - **Listener options** — debounce, throttle, idle (requestIdleCallback), once, CSS selector filtering
 - **Global scheduling** — set default debounce, throttle, or idle at tracker level; per-listener overrides
 - **Tree-shakeable** — ESM + CJS, zero runtime dependencies
@@ -28,8 +28,8 @@ const tracker = init()
 // Track all clicks on interactive elements
 const unsubscribe = tracker.on('click', (event) => {
   console.log(event.targetElement.tagName)   // 'BUTTON'
-  console.log(event.fiber?.componentName)    // 'SubmitButton'
-  console.log(event.fiber?.props)            // { variant: 'primary', onClick: [Function] }
+  console.log(event.fiber?.componentName)    // 'SubmitButton' — nearest component that rendered the <button>
+  console.log(event.fiber?.props)            // { type: 'submit', onClick: [Function], ... } — the <button>'s own props
 })
 
 // Clean up
@@ -146,12 +146,44 @@ interface TrackEvent {
 }
 
 interface FiberInfo {
-  componentName: string | null              // nearest React component
-  props: Readonly<Record<string, unknown>>  // component props (original types, not stringified)
+  componentName: string | null              // nearest React component above targetElement
+  props: Readonly<Record<string, unknown>>  // React props of targetElement itself (original types)
 }
 ```
 
-The library intentionally keeps `TrackEvent` minimal — use `nativeEvent` and `targetElement` to extract any DOM information you need, and `fiber.props` to access rich, typed data from React components (avoiding the `[object Object]` problem of HTML `data-*` attributes).
+`fiber.props` holds the props React passed to the tracked DOM element, not the props of the component named in `componentName`. To attach rich data, put it on the element: `<div onClick={...} data-tracking-payload={{ feature: 'card', index: 0 }}>` gives you the object as-is in `fiber.props`, which avoids the `[object Object]` problem of HTML `data-*` attributes.
+
+The library intentionally keeps `TrackEvent` minimal — use `nativeEvent` and `targetElement` to extract any DOM information you need.
+
+## Event categories
+
+Each event type belongs to a category. The category decides how `targetElement` is resolved and which elements are skipped.
+
+| Category | Event types | `targetElement` | Skips disabled elements |
+|----------|-------------|-----------------|-------------------------|
+| Pointer | `click`, `touchstart`, `touchend` | Nearest interactive element, walking up at most 10 ancestors from the event target. No interactive element found → event not tracked | Yes |
+| Form | `input`, `change`, `focus`, `blur`, `submit` | The event target | Yes |
+| Ambient | `scroll`, `keydown`, `keyup`, `copy`, `paste`, `resize`, `popstate`, `hashchange`, and any other event type | The event target | No |
+
+An element is **interactive** when it is a `button`, `a`, `input`, `select`, `textarea`, `summary`, or `details` element, has an interactive ARIA `role` (for example `button`, `link`, `menuitem`, `tab`, `checkbox`), or has a matching React handler on its own props (for `click`: `onClick`, `onMouseDown`, `onMouseUp`, `onPointerDown`, `onPointerUp`).
+
+An element is **disabled** when it has the `disabled` attribute or `aria-disabled="true"`. `ignoreSelectors` applies to every category and also matches ancestors.
+
+## TypeScript
+
+All public types are exported:
+
+```ts
+import type {
+  Tracker,
+  TrackerConfig,
+  ListenerOptions,
+  SchedulingOptions, // { debounce?, throttle?, idle? } — shared by TrackerConfig and ListenerOptions
+  TrackEvent,
+  FiberInfo,
+  TrackCallback,
+} from 'react-global-tracking'
+```
 
 ## Development
 
