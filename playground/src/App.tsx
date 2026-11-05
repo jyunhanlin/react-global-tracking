@@ -52,6 +52,9 @@ function sanitizeProps(
 
 // ─── Demo Sections ───────────────────────────────────────
 
+// Static, hard-coded markup (no user input) for the dangerouslySetInnerHTML demo.
+const STATIC_RICH_TEXT = "innerHTML + <strong>onClick</strong>";
+
 function PointerSection() {
   return (
     <section style={sectionStyle}>
@@ -94,6 +97,16 @@ function PointerSection() {
         >
           div + onClick
         </div>
+
+        {/* Inner markup has no React fiber. Click the bold text: the log
+            should show <div> (the onClick owner), not <strong>. */}
+        <div
+          onClick={() => console.log("html div click")}
+          data-track="html-div"
+          data-tracking-payload={{ feature: "rich-text", index: 1 }}
+          style={handlerDivStyle}
+          dangerouslySetInnerHTML={{ __html: STATIC_RICH_TEXT }}
+        />
       </div>
     </section>
   );
