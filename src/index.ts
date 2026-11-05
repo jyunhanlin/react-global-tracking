@@ -5,5 +5,6 @@ export type {
   TrackEvent,
   FiberInfo,
   ListenerOptions,
+  SchedulingOptions,
   TrackCallback,
 } from './types'

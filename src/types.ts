@@ -1,12 +1,19 @@
 // === Public Types ===
 
-export interface TrackerConfig {
-  readonly enabled?: boolean
-  readonly ignoreSelectors?: readonly string[]
-  readonly debug?: boolean
+/**
+ * Scheduling for listener callbacks. Set at most one; if several are set,
+ * priority is debounce > throttle > idle. Values are milliseconds.
+ */
+export interface SchedulingOptions {
   readonly debounce?: number
   readonly throttle?: number
   readonly idle?: number
+}
+
+export interface TrackerConfig extends SchedulingOptions {
+  readonly enabled?: boolean
+  readonly ignoreSelectors?: readonly string[]
+  readonly debug?: boolean
 }
 
 export interface Tracker {
@@ -15,10 +22,7 @@ export interface Tracker {
   destroy(): void
 }
 
-export interface ListenerOptions {
-  readonly debounce?: number
-  readonly throttle?: number
-  readonly idle?: number
+export interface ListenerOptions extends SchedulingOptions {
   readonly once?: boolean
   readonly selector?: string
 }

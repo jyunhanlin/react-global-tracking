@@ -1,14 +1,8 @@
-import type { TrackEvent, TrackCallback, ListenerOptions } from '../types'
+import type { TrackEvent, TrackCallback, ListenerOptions, SchedulingOptions } from '../types'
 import { debounce } from '../utils/debounce'
 import { throttle } from '../utils/throttle'
 import { idle } from '../utils/idle'
 import { safeMatches } from '../utils/safe-selector'
-
-export interface SchedulingConfig {
-  readonly debounce?: number
-  readonly throttle?: number
-  readonly idle?: number
-}
 
 interface RegistryEntry {
   readonly eventType: string
@@ -24,7 +18,7 @@ export interface Registry {
   clear(): void
 }
 
-export function createRegistry(globalScheduling?: SchedulingConfig): Registry {
+export function createRegistry(globalScheduling?: SchedulingOptions): Registry {
   let entries: RegistryEntry[] = []
 
   function createEntry(
@@ -86,7 +80,7 @@ export function createRegistry(globalScheduling?: SchedulingConfig): Registry {
 function wrapCallback(
   callback: TrackCallback,
   options: ListenerOptions,
-  globalScheduling?: SchedulingConfig,
+  globalScheduling?: SchedulingOptions,
   onceUnsubscribe?: () => void,
 ): TrackCallback & { cancel?: () => void } {
   // once wraps innermost — fires when the actual callback executes, not when scheduled
@@ -104,7 +98,7 @@ function wrapCallback(
   const scheduling =
     options.debounce != null || options.throttle != null || options.idle != null
       ? options
-      : { ...globalScheduling }
+      : (globalScheduling ?? {})
 
   // Priority: debounce > throttle > idle
   if (scheduling.debounce != null && scheduling.debounce > 0) {

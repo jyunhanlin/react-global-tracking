@@ -1,42 +1,36 @@
-import type { TrackEvent, TrackCallback, ListenerOptions } from '../types'
+import type { TrackEvent, TrackCallback, ListenerOptions, SchedulingOptions } from '../types'
 import { findTrackableElement } from '../filter/filter-engine'
-import { createRegistry, type SchedulingConfig } from './registry'
+import { createRegistry } from './registry'
 
 export interface Pipeline {
-  handleEvent(domEvent: Event): void
+  /** Filters, extracts and dispatches a DOM event. Returns the TrackEvent, or null if filtered out. */
+  handleEvent(domEvent: Event): TrackEvent | null
   getLastEvent(): TrackEvent | null
   addListener(eventType: string, callback: TrackCallback, options: ListenerOptions): () => void
   getEventTypes(): Set<string>
   clear(): void
 }
 
-export interface PipelineConfig {
+export interface PipelineConfig extends SchedulingOptions {
   readonly ignoreSelectors: readonly string[]
-  readonly debounce?: number
-  readonly throttle?: number
-  readonly idle?: number
 }
 
 export function createPipeline(config: PipelineConfig): Pipeline {
-  const globalScheduling: SchedulingConfig = {
-    debounce: config.debounce,
-    throttle: config.throttle,
-    idle: config.idle,
-  }
-  const registry = createRegistry(globalScheduling)
+  // The registry reads only the SchedulingOptions fields of config.
+  const registry = createRegistry(config)
   let lastEvent: TrackEvent | null = null
 
   return {
-    handleEvent(domEvent: Event): void {
+    handleEvent(domEvent: Event): TrackEvent | null {
       const target = domEvent.target
-      if (!(target instanceof Element)) return
+      if (!(target instanceof Element)) return null
 
       const result = findTrackableElement({
         target,
         ignoreSelectors: config.ignoreSelectors,
         eventType: domEvent.type,
       })
-      if (result === null) return
+      if (result === null) return null
 
       const trackEvent: TrackEvent = {
         nativeEvent: domEvent,
@@ -46,6 +40,7 @@ export function createPipeline(config: PipelineConfig): Pipeline {
 
       registry.invoke(trackEvent)
       lastEvent = trackEvent
+      return trackEvent
     },
 
     getLastEvent(): TrackEvent | null {

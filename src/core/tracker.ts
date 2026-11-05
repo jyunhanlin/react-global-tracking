@@ -14,12 +14,8 @@ export function createTracker(config?: TrackerConfig): Tracker {
     }
   }
 
-  const pipeline = createPipeline({
-    ignoreSelectors,
-    debounce: config?.debounce,
-    throttle: config?.throttle,
-    idle: config?.idle,
-  })
+  // config also carries the global SchedulingOptions (debounce/throttle/idle)
+  const pipeline = createPipeline({ ...config, ignoreSelectors })
   const domListeners = new Map<string, (event: Event) => void>()
   let destroyed = false
 
@@ -30,13 +26,9 @@ export function createTracker(config?: TrackerConfig): Tracker {
     if (domListeners.has(eventType)) return
 
     const handler = (event: Event): void => {
-      pipeline.handleEvent(event)
-
-      if (debug) {
-        const lastEvent = pipeline.getLastEvent()
-        if (lastEvent?.nativeEvent === event) {
-          console.debug('[react-global-tracking]', lastEvent)
-        }
+      const trackEvent = pipeline.handleEvent(event)
+      if (debug && trackEvent !== null) {
+        console.debug('[react-global-tracking]', trackEvent)
       }
     }
 

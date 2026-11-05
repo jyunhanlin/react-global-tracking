@@ -39,10 +39,11 @@ describe('createPipeline', () => {
 
     const event = new MouseEvent('click', { bubbles: true })
     Object.defineProperty(event, 'target', { value: button })
-    pipeline.handleEvent(event)
+    const returned = pipeline.handleEvent(event)
 
     expect(callback).toHaveBeenCalledOnce()
     const trackEvent = callback.mock.calls[0][0]
+    expect(returned).toBe(trackEvent)
     expect(trackEvent.nativeEvent.type).toBe('click')
     expect(trackEvent.targetElement).toBe(button)
     expect(trackEvent.fiber?.componentName).toBe('SubmitButton')
@@ -63,7 +64,7 @@ describe('createPipeline', () => {
 
     const event = new MouseEvent('click', { bubbles: true })
     Object.defineProperty(event, 'target', { value: div })
-    pipeline.handleEvent(event)
+    expect(pipeline.handleEvent(event)).toBeNull()
 
     expect(callback).not.toHaveBeenCalled()
     div.remove()
