@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "react-global-tracking": path.resolve(__dirname, "../dist/index.mjs"),
+      "react-global-tracking": path.resolve(__dirname, "../dist/index.js"),
     },
   },
 });
