@@ -6,55 +6,47 @@ export const EventCategory = {
 
 export type EventCategory = (typeof EventCategory)[keyof typeof EventCategory]
 
-// Maps DOM event types to React handler prop names used to detect interactivity.
-// For click, we include mouse/pointer handlers because an element with only
-// onMouseDown (no onClick) is still interactive from a tracking perspective.
-const EVENT_HANDLER_MAP: Readonly<Record<string, readonly string[]>> = {
-  // Pointer — includes related mouse/pointer handlers to catch all interactive patterns
-  click: ['onClick', 'onMouseDown', 'onMouseUp', 'onPointerDown', 'onPointerUp'],
-  touchstart: ['onTouchStart'],
-  touchend: ['onTouchEnd'],
-
-  // Form
-  input: ['onChange', 'onInput'],
-  change: ['onChange'],
-  focus: ['onFocus'],
-  blur: ['onBlur'],
-  submit: ['onSubmit'],
-
-  // Ambient
-  scroll: ['onScroll'],
-  keydown: ['onKeyDown'],
-  keyup: ['onKeyUp'],
-  copy: ['onCopy'],
-  paste: ['onPaste'],
+interface EventSpec {
+  readonly category: EventCategory
+  // React handler prop names used to detect interactivity (pointer events only
+  // need them; other categories keep them for completeness).
+  readonly handlers: readonly string[]
 }
 
-const CATEGORY_MAP: Readonly<Record<string, EventCategory>> = {
-  click: EventCategory.Pointer,
-  touchstart: EventCategory.Pointer,
-  touchend: EventCategory.Pointer,
+// Single source of truth: one row per known DOM event type.
+// Unknown event types fall back to Ambient with no handlers.
+const EVENT_SPECS: Readonly<Record<string, EventSpec>> = {
+  // Pointer — click includes related mouse/pointer handlers because an element
+  // with only onMouseDown (no onClick) is still interactive from a tracking perspective.
+  click: {
+    category: EventCategory.Pointer,
+    handlers: ['onClick', 'onMouseDown', 'onMouseUp', 'onPointerDown', 'onPointerUp'],
+  },
+  touchstart: { category: EventCategory.Pointer, handlers: ['onTouchStart'] },
+  touchend: { category: EventCategory.Pointer, handlers: ['onTouchEnd'] },
 
-  input: EventCategory.Form,
-  change: EventCategory.Form,
-  focus: EventCategory.Form,
-  blur: EventCategory.Form,
-  submit: EventCategory.Form,
+  // Form
+  input: { category: EventCategory.Form, handlers: ['onChange', 'onInput'] },
+  change: { category: EventCategory.Form, handlers: ['onChange'] },
+  focus: { category: EventCategory.Form, handlers: ['onFocus'] },
+  blur: { category: EventCategory.Form, handlers: ['onBlur'] },
+  submit: { category: EventCategory.Form, handlers: ['onSubmit'] },
 
-  scroll: EventCategory.Ambient,
-  keydown: EventCategory.Ambient,
-  keyup: EventCategory.Ambient,
-  copy: EventCategory.Ambient,
-  paste: EventCategory.Ambient,
-  resize: EventCategory.Ambient,
-  popstate: EventCategory.Ambient,
-  hashchange: EventCategory.Ambient,
+  // Ambient
+  scroll: { category: EventCategory.Ambient, handlers: ['onScroll'] },
+  keydown: { category: EventCategory.Ambient, handlers: ['onKeyDown'] },
+  keyup: { category: EventCategory.Ambient, handlers: ['onKeyUp'] },
+  copy: { category: EventCategory.Ambient, handlers: ['onCopy'] },
+  paste: { category: EventCategory.Ambient, handlers: ['onPaste'] },
+  resize: { category: EventCategory.Ambient, handlers: [] },
+  popstate: { category: EventCategory.Ambient, handlers: [] },
+  hashchange: { category: EventCategory.Ambient, handlers: [] },
 }
 
 export function getEventCategory(eventType: string): EventCategory {
-  return CATEGORY_MAP[eventType] ?? EventCategory.Ambient
+  return EVENT_SPECS[eventType]?.category ?? EventCategory.Ambient
 }
 
 export function getHandlersForEvent(eventType: string): readonly string[] {
-  return EVENT_HANDLER_MAP[eventType] ?? []
+  return EVENT_SPECS[eventType]?.handlers ?? []
 }
